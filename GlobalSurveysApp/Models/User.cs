@@ -42,7 +42,7 @@ namespace GlobalSurveysApp.Models
 
         public ICollection<Advance> Advances { get; set; } = null!;
         public ICollection<Complaint> Complaints { get; set; } = null!;
-        public ICollection<Message> Messages { get; set; } = null!;
+        public ICollection<Message> Messages { get; set; } = null!; 
         
 
 
