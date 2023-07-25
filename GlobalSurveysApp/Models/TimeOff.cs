@@ -21,6 +21,8 @@ namespace GlobalSurveysApp.Models
         [Required]
         public DateTime CreatedAt { get; set;} = DateTime.Now;
         [Required]
+        public RequestStatus Status { get; set; } = RequestStatus.Pending;
+        [Required]
         public int UserId { get; set; }
         [Required]
         public int SubstituteEmployeeId { get; set; }

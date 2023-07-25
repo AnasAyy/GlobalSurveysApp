@@ -19,7 +19,12 @@ namespace GlobalSurveysApp.Models
         public string PhoneNumber { get; set; } = null!;
         [Required]
         public string Email { get; set; } = null!;
-        [Required] 
+        [Required]
+        public int Department { get; set; } 
+        [Required]
+        public int Location { get; set; }
+        [Required]
+        
         public string UserName { get; set;} = null!;
         [Required]
         public string Password { get; set; }= null!;
@@ -32,10 +37,10 @@ namespace GlobalSurveysApp.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? UpdatedAt { get; set; }
         public string FCMtoken { get; set; } = string.Empty;
-        public ICollection<User> Users { get; set; } = null!;
-
+        public int? DirectResponsibleId { get; set; }
         [ForeignKey("DirectResponsibleId")]
-        public int DirectResponsibleId { get; set; }
+        public virtual User DirectResponsible { get; set; } = null!;
+
 
         [ForeignKey("RoleId")]
         public int RoleId { get; set; }
@@ -43,6 +48,7 @@ namespace GlobalSurveysApp.Models
         public ICollection<Advance> Advances { get; set; } = null!;
         public ICollection<Complaint> Complaints { get; set; } = null!;
         public ICollection<Message> Messages { get; set; } = null!; 
+        public ICollection<Approver> Approvers { get; set; } = null!;
         
 
 

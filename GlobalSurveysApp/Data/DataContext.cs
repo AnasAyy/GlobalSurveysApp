@@ -18,6 +18,10 @@ namespace GlobalSurveysApp.Data
         public DbSet<PublicList> PublicList { get; set; } = null!;
         public DbSet<Advance> Advances { get; set; } = null!;
         public DbSet<TimeOff> TimeOffs { get; set; } = null!;
+        public DbSet<Complaint> Complaints { get; set; } = null!;
+        public DbSet<Message> Messages { get; set; } = null!;
+        public DbSet<Approver> Approvers { get; set; } = null!;
+        public DbSet<LogFile> logFiles { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

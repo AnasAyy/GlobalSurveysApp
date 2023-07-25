@@ -11,8 +11,11 @@ namespace GlobalSurveysApp.Models
         public string Title { get; set; } = null!;
         [Required]
         public string Description { get; set; } = null!;
-        //[Required]
-        //public int departmentName { get;}
+        [Required]
+        public int DepartmentName { get; set; }
+        [Required]
+        public RequestStatus Status { get; set; } = RequestStatus.Pending;
+
         [ForeignKey("UserId")]
         public int UserId { get; set; }
     }
