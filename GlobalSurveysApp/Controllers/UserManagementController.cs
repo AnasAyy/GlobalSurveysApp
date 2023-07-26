@@ -3,6 +3,7 @@ using GlobalSurveysApp.Data.Repo;
 using GlobalSurveysApp.Data.Repos;
 using GlobalSurveysApp.Dtos;
 using GlobalSurveysApp.Dtos.UserManagmentDtos;
+using GlobalSurveysApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -255,5 +256,14 @@ namespace GlobalSurveysApp.Controllers
 
 
         //}
+
+        [AllowAnonymous,HttpGet("test")]
+        public IActionResult test()
+        {
+            return Ok( new
+            {
+                message = "HI"
+            } );
+        }
     }
 }
