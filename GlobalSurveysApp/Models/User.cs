@@ -23,8 +23,8 @@ namespace GlobalSurveysApp.Models
         public int Department { get; set; } 
         [Required]
         public int Location { get; set; }
-        [Required]
         
+        [Required]
         public string UserName { get; set;} = null!;
         [Required]
         public string Password { get; set; }= null!;
@@ -32,6 +32,8 @@ namespace GlobalSurveysApp.Models
         public string QRcode { get; set; } = null!;
         [Required]
         public bool IsActive { get; set; } = true;
+        [Required]
+        public bool IsVerified { get; set; } = false;
         public DateTime? LastLogin { get; set; }
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.Now;

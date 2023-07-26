@@ -15,7 +15,7 @@ namespace GlobalSurveysApp.Data
 
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Role> Roles { get; set; } = null!;
-        public DbSet<PublicList> PublicList { get; set; } = null!;
+        public DbSet<PublicList> PublicLists { get; set; } = null!;
         public DbSet<Advance> Advances { get; set; } = null!;
         public DbSet<TimeOff> TimeOffs { get; set; } = null!;
         public DbSet<Complaint> Complaints { get; set; } = null!;

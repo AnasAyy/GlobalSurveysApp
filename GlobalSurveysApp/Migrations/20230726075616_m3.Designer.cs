@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GlobalSurveysApp.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230725082048_m1")]
-    partial class m1
+    [Migration("20230726075616_m3")]
+    partial class m3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -226,7 +226,7 @@ namespace GlobalSurveysApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PublicList");
+                    b.ToTable("PublicLists");
                 });
 
             modelBuilder.Entity("GlobalSurveysApp.Models.Role", b =>
@@ -334,6 +334,9 @@ namespace GlobalSurveysApp.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastLogin")
