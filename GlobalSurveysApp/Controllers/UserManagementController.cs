@@ -31,6 +31,14 @@ namespace GlobalSurveysApp.Controllers
             _mapper = mapper;
         }
 
+        [AllowAnonymous, HttpGet("test")]
+        public IActionResult test()
+        {
+            return Ok(new
+            {
+                message = "HI"
+            });
+        }
 
         [AllowAnonymous, HttpPost("LoginViaUsername")]
         public ActionResult<LoginResponseDto> LoginViaUsername(LoginViaUsernameRequestDto request)
@@ -49,6 +57,15 @@ namespace GlobalSurveysApp.Controllers
             if (user == null)
             {
                 return Unauthorized();
+            }
+            if (!user.IsActive)
+            {
+                return BadRequest(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "الحساب غير مفعل",
+                    MessageEn = "Account is disactive",
+                });
             }
             #endregion
 
@@ -120,6 +137,15 @@ namespace GlobalSurveysApp.Controllers
             if (user == null)
             {
                 return Unauthorized();
+            }
+            if (!user.IsActive)
+            {
+                return BadRequest(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "الحساب غير مفعل",
+                    MessageEn = "Account is disactive",
+                });
             }
             #endregion
 
@@ -233,37 +259,73 @@ namespace GlobalSurveysApp.Controllers
             return Ok();
             #endregion
         }
-        //[Authorize, HttpPut("VerifiyUser")]
-        //public IActionResult VerifiyUser()
-        //{
-        //    #region Check if User Exist
-        //    var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
-        //    if (userId == null)
-        //    {
-        //        return Unauthorized();
-        //    }
-        //    var result = _userRepo.GetUserById(Convert.ToInt32(userId.Value));
-        //    if (result == null)
-        //    {
-        //        return NotFound(new ErrorDto()
-        //        {
-        //            Code = 404,
-        //            MessageAr = "",
-        //            MessageEn = ""
-        //        });
-        //    }
-        //    #endregion
 
-
-        //}
-
-        [AllowAnonymous,HttpGet("test")]
-        public IActionResult test()
+        [Authorize,HttpPut("UpdatePassword")]
+        public IActionResult UpdatePassword(VerifiyUserPasswordRequestDto request)
         {
-            return Ok( new
+            #region Check Password
+            if (request.Password != request.ConfirmPassword)
             {
-                message = "HI"
-            } );
+                return BadRequest(new ErrorDto() 
+                {
+                    Code = 400,
+                    MessageAr = "كلمات المرور التي أدخلتها غير متطابقة. يرجى المحاولة مرة أخرى",
+                    MessageEn = "The passwords you entered do not match. Please try again",
+                });
+            }
+            #endregion
+
+            #region Encrypt Password
+            var encryptedPassword = _encryptRepo.EncryptPassword(request.Password);
+            if (encryptedPassword == string.Empty)
+            {
+                return BadRequest();
+            }
+            request.Password = encryptedPassword;
+            #endregion
+
+            #region Check Token Data
+            var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            #endregion
+
+            #region Check if User Exist
+            var result = _userRepo.GetUserById(Convert.ToInt32(userId.Value));
+            if (result == null)
+            {
+                return NotFound(new ErrorDto()
+                {
+                    Code = 404,
+                    MessageAr = "",
+                    MessageEn = ""
+                });
+            }
+            #endregion
+
+            #region Update Password  
+            result.Password = encryptedPassword;
+            _userRepo.Update(result);
+            if (!_userRepo.SaveChanges())
+            {
+                return BadRequest(new ErrorDto()
+                {
+                    Code = 400,
+                    MessageAr = "",
+                    MessageEn = ""
+                });
+            }
+
+            return Ok();
+            #endregion
+
         }
+
+
+
+
+
     }
 }
