@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GlobalSurveysApp.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230726075247_m1")]
+    [Migration("20230727110718_m1")]
     partial class m1
     {
         /// <inheritdoc />
@@ -130,6 +130,37 @@ namespace GlobalSurveysApp.Migrations
                     b.ToTable("Complaints");
                 });
 
+            modelBuilder.Entity("GlobalSurveysApp.Models.FCMtoken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("FCMtokens");
+                });
+
             modelBuilder.Entity("GlobalSurveysApp.Models.LogFile", b =>
                 {
                     b.Property<int>("Id")
@@ -171,7 +202,7 @@ namespace GlobalSurveysApp.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("logFiles");
+                    b.ToTable("LogFiles");
                 });
 
             modelBuilder.Entity("GlobalSurveysApp.Models.Message", b =>
@@ -226,7 +257,7 @@ namespace GlobalSurveysApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PublicList");
+                    b.ToTable("PublicLists");
                 });
 
             modelBuilder.Entity("GlobalSurveysApp.Models.Role", b =>
@@ -325,10 +356,6 @@ namespace GlobalSurveysApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FCMtoken")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -415,6 +442,15 @@ namespace GlobalSurveysApp.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("GlobalSurveysApp.Models.FCMtoken", b =>
+                {
+                    b.HasOne("GlobalSurveysApp.Models.User", null)
+                        .WithMany("FCMtokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("GlobalSurveysApp.Models.LogFile", b =>
                 {
                     b.HasOne("GlobalSurveysApp.Models.User", "User")
@@ -481,6 +517,8 @@ namespace GlobalSurveysApp.Migrations
                     b.Navigation("Approvers");
 
                     b.Navigation("Complaints");
+
+                    b.Navigation("FCMtokens");
 
                     b.Navigation("Messages");
                 });

@@ -1,4 +1,4 @@
-﻿using GlobalSurveysApp.Dtos.UserManagmentDtos;
+﻿using GlobalSurveysApp.Dtos.UserManagmentDtos.LoginManagement;
 using GlobalSurveysApp.Models;
 
 
@@ -12,6 +12,9 @@ namespace GlobalSurveysApp.Data.Repo
         public User? GetUserById(int id);
         public bool SaveChanges();
         public bool IsVerified(int id);
+        public void CreateFCM(FCMtoken fCMtoken);
+        
+        
     }
 
     public class UserRepo : IUserRepo
@@ -79,6 +82,11 @@ namespace GlobalSurveysApp.Data.Repo
 
             return result != null ? result.IsVerified : false;
 
+        }
+
+        public void CreateFCM(FCMtoken fCMtoken)
+        {
+            _context.FCMtokens.Add(fCMtoken);
         }
 
         

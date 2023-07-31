@@ -1,4 +1,4 @@
-﻿namespace GlobalSurveysApp.Dtos.UserManagmentDtos
+﻿namespace GlobalSurveysApp.Dtos.UserManagmentDtos.LoginManagement
 {
     public class FCMtokenRequestDto
     {

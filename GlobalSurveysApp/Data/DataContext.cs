@@ -21,7 +21,8 @@ namespace GlobalSurveysApp.Data
         public DbSet<Complaint> Complaints { get; set; } = null!;
         public DbSet<Message> Messages { get; set; } = null!;
         public DbSet<Approver> Approvers { get; set; } = null!;
-        public DbSet<LogFile> logFiles { get; set; } = null!;
+        public DbSet<LogFile> LogFiles { get; set; } = null!;
+        public DbSet<FCMtoken> FCMtokens { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

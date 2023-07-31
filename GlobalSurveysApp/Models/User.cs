@@ -1,5 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data;
 
 namespace GlobalSurveysApp.Models
 {
@@ -16,7 +18,29 @@ namespace GlobalSurveysApp.Models
         [Required]
         public string LastName { get; set; } = null!;
         [Required]
-        public string PhoneNumber { get; set; } = null!;
+        public string WorkMobile { get; set; } = null!;
+        [Required]
+
+        public string PrivateMobile { get; set; } = null!;
+        [Required]
+        public int placeOfBirth { get; set; }
+        [Required]
+        public DateTime DateOfBirth { get; set; }
+        [Required]
+        public int CertificateLevel { get; set; }
+        [Required]
+        public int FieldOfStudy { get; set; }
+        [Required]
+        public int PassportNumber { get; set; }
+        
+        [Required]
+        public int Gender { get; set; }
+        [Required]
+        public DateTime FirstContractDate { get; set; }
+        [Required]
+        public int Postion { get; set;}
+        [Required]
+        public int Nationality { get; set; }
         [Required]
         public string Email { get; set; } = null!;
         [Required]
@@ -30,6 +54,9 @@ namespace GlobalSurveysApp.Models
         public string Password { get; set; }= null!;
         [Required] 
         public string QRcode { get; set; } = null!;
+        
+        public string?  IdCard { get; set; }
+        public string? PersonalPhoto { get; set; }
         [Required]
         public bool IsActive { get; set; } = true;
         [Required]
@@ -38,7 +65,6 @@ namespace GlobalSurveysApp.Models
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? UpdatedAt { get; set; }
-        public string FCMtoken { get; set; } = string.Empty;
         public int? DirectResponsibleId { get; set; }
         [ForeignKey("DirectResponsibleId")]
         public virtual User DirectResponsible { get; set; } = null!;
@@ -51,10 +77,8 @@ namespace GlobalSurveysApp.Models
         public ICollection<Complaint> Complaints { get; set; } = null!;
         public ICollection<Message> Messages { get; set; } = null!; 
         public ICollection<Approver> Approvers { get; set; } = null!;
+        public ICollection<FCMtoken> FCMtokens { get; set; } = null!;
         
-
-
-
 
     }
 }

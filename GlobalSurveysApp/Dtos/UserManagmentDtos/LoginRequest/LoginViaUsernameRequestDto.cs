@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace  GlobalSurveysApp.Dtos.UserManagmentDtos
+namespace GlobalSurveysApp.Dtos.UserManagmentDtos.LoginManagement
 {
     public class LoginViaUsernameRequestDto
     {
@@ -9,7 +9,7 @@ namespace  GlobalSurveysApp.Dtos.UserManagmentDtos
         public string Username { get; set; } = null!;
 
         [Required]
-        [RegularExpression(@"^(?=^.{8,}$)(?=.*\d)(?=.*[a-zA-Z])[0-9a-zA-Z]*$", ErrorMessage = "Invalid Input")]
+        [RegularExpression(@"^[a-zA-Z0-9]{8,}$", ErrorMessage = "Invalid Input")]
         public string Password { get; set; } = null!;
     }
 }

@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using GlobalSurveysApp.Dtos.UserManagmentDtos;
+using GlobalSurveysApp.Dtos.UserManagmentDtos.LoginManagement;
 using GlobalSurveysApp.Models;
 
 namespace GlobalSurveysApp.Profiles

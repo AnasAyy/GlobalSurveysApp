@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GlobalSurveysApp.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230726075538_m2")]
-    partial class m2
+    [Migration("20230731073844_m3")]
+    partial class m3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -130,6 +130,37 @@ namespace GlobalSurveysApp.Migrations
                     b.ToTable("Complaints");
                 });
 
+            modelBuilder.Entity("GlobalSurveysApp.Models.FCMtoken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("FCMtokens");
+                });
+
             modelBuilder.Entity("GlobalSurveysApp.Models.LogFile", b =>
                 {
                     b.Property<int>("Id")
@@ -171,7 +202,7 @@ namespace GlobalSurveysApp.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("logFiles");
+                    b.ToTable("LogFiles");
                 });
 
             modelBuilder.Entity("GlobalSurveysApp.Models.Message", b =>
@@ -212,21 +243,30 @@ namespace GlobalSurveysApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("NameAR")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("NameEn")
+                    b.Property<string>("NameEN")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Parent")
+                        .HasColumnType("int");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
-                    b.ToTable("PublicList");
+                    b.ToTable("PublicLists");
                 });
 
             modelBuilder.Entity("GlobalSurveysApp.Models.Role", b =>
@@ -312,7 +352,13 @@ namespace GlobalSurveysApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CertificateLevel")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Department")
@@ -325,13 +371,18 @@ namespace GlobalSurveysApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FCMtoken")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("FieldOfStudy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FirstContractDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Gender")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -349,11 +400,20 @@ namespace GlobalSurveysApp.Migrations
                     b.Property<int>("Location")
                         .HasColumnType("int");
 
+                    b.Property<int>("Nationality")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PassportNumber")
+                        .HasColumnType("int");
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PhoneNumber")
+                    b.Property<int>("Postion")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PrivateMobile")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -378,6 +438,13 @@ namespace GlobalSurveysApp.Migrations
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WorkMobile")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("placeOfBirth")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -410,6 +477,15 @@ namespace GlobalSurveysApp.Migrations
                 {
                     b.HasOne("GlobalSurveysApp.Models.User", null)
                         .WithMany("Complaints")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("GlobalSurveysApp.Models.FCMtoken", b =>
+                {
+                    b.HasOne("GlobalSurveysApp.Models.User", null)
+                        .WithMany("FCMtokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -481,6 +557,8 @@ namespace GlobalSurveysApp.Migrations
                     b.Navigation("Approvers");
 
                     b.Navigation("Complaints");
+
+                    b.Navigation("FCMtokens");
 
                     b.Navigation("Messages");
                 });

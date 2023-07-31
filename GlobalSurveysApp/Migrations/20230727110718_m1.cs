@@ -12,7 +12,7 @@ namespace GlobalSurveysApp.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "PublicList",
+                name: "PublicLists",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -23,7 +23,7 @@ namespace GlobalSurveysApp.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PublicList", x => x.Id);
+                    table.PrimaryKey("PK_PublicLists", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -65,7 +65,6 @@ namespace GlobalSurveysApp.Migrations
                     LastLogin = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    FCMtoken = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DirectResponsibleId = table.Column<int>(type: "int", nullable: true),
                     RoleId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -159,7 +158,30 @@ namespace GlobalSurveysApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "logFiles",
+                name: "FCMtokens",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Token = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FCMtokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FCMtokens_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LogFiles",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -175,9 +197,9 @@ namespace GlobalSurveysApp.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_logFiles", x => x.Id);
+                    table.PrimaryKey("PK_LogFiles", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_logFiles_Users_UserId",
+                        name: "FK_LogFiles_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -255,8 +277,13 @@ namespace GlobalSurveysApp.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_logFiles_UserId",
-                table: "logFiles",
+                name: "IX_FCMtokens_UserId",
+                table: "FCMtokens",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LogFiles_UserId",
+                table: "LogFiles",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -298,13 +325,16 @@ namespace GlobalSurveysApp.Migrations
                 name: "Complaints");
 
             migrationBuilder.DropTable(
-                name: "logFiles");
+                name: "FCMtokens");
+
+            migrationBuilder.DropTable(
+                name: "LogFiles");
 
             migrationBuilder.DropTable(
                 name: "Messages");
 
             migrationBuilder.DropTable(
-                name: "PublicList");
+                name: "PublicLists");
 
             migrationBuilder.DropTable(
                 name: "TimeOffs");

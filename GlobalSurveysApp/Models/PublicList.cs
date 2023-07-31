@@ -9,8 +9,11 @@ namespace GlobalSurveysApp.Models
         [Required]
         public string NameAR { get; set; } = null!;
         [Required]
-        public string NameEn { get; set; } = null!;
+        public string NameEN { get; set; } = null!;
         [Required]
-        public string Type { get; set; } = null!;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime UpdatedAt { get; set; }
+        [Required]
+        public int Type { get; set; } = 0;
     }
 }

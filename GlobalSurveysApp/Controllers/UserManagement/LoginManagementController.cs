@@ -2,7 +2,7 @@
 using GlobalSurveysApp.Data.Repo;
 using GlobalSurveysApp.Data.Repos;
 using GlobalSurveysApp.Dtos;
-using GlobalSurveysApp.Dtos.UserManagmentDtos;
+using GlobalSurveysApp.Dtos.UserManagmentDtos.LoginManagement;
 using GlobalSurveysApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -12,23 +12,25 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace GlobalSurveysApp.Controllers
+namespace GlobalSurveysApp.Controllers.UserManagement
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserManagementController : ControllerBase
+    public class LoginManagementController : ControllerBase
     {
         private readonly IConfiguration _configuration;
         private readonly IEncryptRepo _encryptRepo;
         private readonly IUserRepo _userRepo;
         private readonly IMapper _mapper;
+        private readonly IRoleRepo _role;
 
-        public UserManagementController(IConfiguration configuration, IEncryptRepo encryptRepo, IUserRepo userRepo, IMapper mapper)
+        public LoginManagementController(IConfiguration configuration, IEncryptRepo encryptRepo, IUserRepo userRepo,IRoleRepo roleRepo, IMapper mapper)
         {
             _configuration = configuration;
             _encryptRepo = encryptRepo;
             _userRepo = userRepo;
             _mapper = mapper;
+            _role = roleRepo;
         }
 
         [AllowAnonymous, HttpGet("test")]
@@ -76,7 +78,7 @@ namespace GlobalSurveysApp.Controllers
             {
                 return BadRequest();
             }
-            
+
 
             var claims = new[] {
                         new Claim(JwtRegisteredClaimNames.Sub, subject),
@@ -84,6 +86,7 @@ namespace GlobalSurveysApp.Controllers
                         new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
                         new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                         new Claim(ClaimTypes.Name, user.Id.ToString()),
+                        
 
                     };
 
@@ -97,10 +100,10 @@ namespace GlobalSurveysApp.Controllers
                 signingCredentials: signIn);
 
             var stringToken = new JwtSecurityTokenHandler().WriteToken(token);
-            
 
-            
-            
+
+
+
             return Ok(new LoginResponseDto()
             {
                 Token = stringToken,
@@ -108,11 +111,12 @@ namespace GlobalSurveysApp.Controllers
                 {
                     FirstName = user.FirstName,
                     LastName = user.LastName,
-                    PhoneNumber = user.PhoneNumber,
-                    UserRole = "Admin"
+                    PhoneNumber = user.WorkMobile,
+                    UserRole = "Admin",
+                    IsVerified = user.IsVerified,
                 }
 
-                
+
 
             });
             #endregion
@@ -129,7 +133,7 @@ namespace GlobalSurveysApp.Controllers
             {
                 return BadRequest();
             }
-            request.QRcode= encryptedQRcode;
+            request.QRcode = encryptedQRcode;
             #endregion
 
             #region Check user
@@ -149,6 +153,11 @@ namespace GlobalSurveysApp.Controllers
             }
             #endregion
 
+            #region Get User Role
+            string role = _role.GetRoleById(user.RoleId);
+
+            #endregion
+
             #region Create Token
             var subject = _configuration["Jwt:Subject"];
             var keyhash = _configuration["Jwt:Key"];
@@ -156,13 +165,15 @@ namespace GlobalSurveysApp.Controllers
             {
                 return BadRequest();
             }
-            
+
             var claims = new[] {
                         new Claim(JwtRegisteredClaimNames.Sub, subject),
                         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                         new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
                         new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                         new Claim(ClaimTypes.Name, user.Id.ToString()),
+                        new Claim(ClaimTypes.Role, role),
+                        
 
                     };
 
@@ -184,8 +195,9 @@ namespace GlobalSurveysApp.Controllers
                 {
                     FirstName = user.FirstName,
                     LastName = user.LastName,
-                    PhoneNumber = user.PhoneNumber,
-                    UserRole = "Admin"
+                    PhoneNumber = user.WorkMobile,
+                    UserRole = "Admin",
+                    IsVerified = user.IsVerified,
                 }
             });
             #endregion
@@ -242,10 +254,11 @@ namespace GlobalSurveysApp.Controllers
             }
             #endregion
 
-            #region Update FCMtoken
-            result.UpdatedAt = DateTime.Now;
-            result.FCMtoken = request.FCMtoken;
-            _userRepo.Update(result);
+            #region Add FCMtoken
+            var FCMtoken = new FCMtoken();
+            FCMtoken.Token = request.FCMtoken;
+            FCMtoken.UserId = result.Id;
+            _userRepo.CreateFCM(FCMtoken);
             if (!_userRepo.SaveChanges())
             {
                 return BadRequest(new ErrorDto()
@@ -260,13 +273,13 @@ namespace GlobalSurveysApp.Controllers
             #endregion
         }
 
-        [Authorize,HttpPut("UpdatePassword")]
+        [Authorize, HttpPut("UpdatePassword")]
         public IActionResult UpdatePassword(VerifiyUserPasswordRequestDto request)
         {
             #region Check Password
             if (request.Password != request.ConfirmPassword)
             {
-                return BadRequest(new ErrorDto() 
+                return BadRequest(new ErrorDto()
                 {
                     Code = 400,
                     MessageAr = "كلمات المرور التي أدخلتها غير متطابقة. يرجى المحاولة مرة أخرى",
@@ -307,6 +320,7 @@ namespace GlobalSurveysApp.Controllers
 
             #region Update Password  
             result.Password = encryptedPassword;
+            result.IsVerified = true;
             _userRepo.Update(result);
             if (!_userRepo.SaveChanges())
             {
@@ -323,7 +337,45 @@ namespace GlobalSurveysApp.Controllers
 
         }
 
+        [Authorize, HttpPut("TempAPI")]
+        public IActionResult TempAPI()
+        {
+            #region Check Token Data
+            var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            #endregion
 
+            #region Check if User Exist
+            var result = _userRepo.GetUserById(Convert.ToInt32(userId.Value));
+            if (result == null)
+            {
+                return NotFound(new ErrorDto()
+                {
+                    Code = 404,
+                    MessageAr = "",
+                    MessageEn = ""
+                });
+            }
+            #endregion
+
+            result.IsVerified = false;
+            _userRepo.Update(result);
+
+            if (!_userRepo.SaveChanges())
+            {
+                return BadRequest(new ErrorDto()
+                {
+                    Code = 400,
+                    MessageAr = "",
+                    MessageEn = ""
+                });
+            }
+
+            return Ok();
+        }
 
 
 
