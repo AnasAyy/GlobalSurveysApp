@@ -2,6 +2,8 @@
 {
     public class GetAllItemsRequestDto
     {
-        public int page { get; set; }
+        public int Page { get; set; }
+        public int Type { get; set; }
+
     }
 }

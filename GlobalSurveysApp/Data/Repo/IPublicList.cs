@@ -9,14 +9,13 @@ namespace GlobalSurveysApp.Data.Repo
         public void Create(PublicList publicList);
         public void Update(PublicList publicList);
         public List<PublicList> GetMainItem();
-        public IQueryable<GetAllItemsResponseDto> GetAll();
-        public PublicList? GetByNameAR(string nameAR);
-        public PublicList? GetByNameEN(string nameEN);
+        public IQueryable<GetAllItemsResponseDto> GetAll(int type);
         public bool CheckType(int type);
-        public bool GetITemByName (string nameAR , string nameEN);
-        public PublicList? GetById (int id);
+        public bool GetITemByNameForAdd(string nameAR, string nameEN);
+        public bool GetITemByNameForUpdate(string nameAR, string nameEN, int type, int id);
+        public PublicList? GetById(int id);
         public bool SaveChanges();
-        
+
     }
 
     public class Public : IPublicList
@@ -38,15 +37,18 @@ namespace GlobalSurveysApp.Data.Repo
             return _context.PublicLists.Where(x => x.Type == 0).ToList();
         }
 
-        public IQueryable<GetAllItemsResponseDto> GetAll()
+
+        public IQueryable<GetAllItemsResponseDto> GetAll(int type)
         {
-            return _context.PublicLists.Select(p => new GetAllItemsResponseDto
-            {
-                Id = p.Id,
-                NameAR = p.NameAR,
-                NameEN = p.NameEN,
-                Type = p.Type,
-            });
+            return from p in _context.PublicLists
+                   where p.Type == type && p.Type != 0
+                   select new GetAllItemsResponseDto
+                   { 
+                       Id = p.Id,
+                      NameAR = p.NameAR,
+                      NameEN = p.NameEN
+                   };
+
         }
 
         public PublicList? GetById(int id)
@@ -56,20 +58,11 @@ namespace GlobalSurveysApp.Data.Repo
             return x;
         }
 
-        public PublicList? GetByNameAR(string nameAR)
+        public bool GetITemByNameForAdd(string nameAR, string nameEN)
         {
-             return _context.PublicLists.FirstOrDefault(x => x.NameAR == nameAR);
 
-        }
-        public PublicList? GetByNameEN(string nameEN)
-        {
-            return _context.PublicLists.FirstOrDefault(x => x.NameEN == nameEN);
-
-        }
-
-        public bool GetITemByName(string nameAR, string nameEN )
-        {
             return _context.PublicLists.Any(x => x.NameAR == nameAR || x.NameEN == nameEN);
+
         }
 
         public bool SaveChanges()
@@ -77,7 +70,8 @@ namespace GlobalSurveysApp.Data.Repo
             try
             {
                 return _context.SaveChanges() > 0;
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 _context.ChangeTracker.Clear();
                 Console.WriteLine(ex.Message);
@@ -93,6 +87,11 @@ namespace GlobalSurveysApp.Data.Repo
         public bool CheckType(int type)
         {
             return _context.PublicLists.Any(x => x.Id == type && x.Type == 0);
+        }
+
+        public bool GetITemByNameForUpdate(string nameAR, string nameEN, int type, int id)
+        {
+            return _context.PublicLists.Any(x => x.NameAR == nameAR && x.NameEN == nameEN && x.Type == type && x.Id != id);
         }
     }
 }

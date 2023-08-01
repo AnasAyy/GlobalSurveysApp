@@ -28,12 +28,12 @@ namespace GlobalSurveysApp.Controllers.PublicListManagement
         [Authorize(Roles = "Admin"), HttpPost("AddItem")]
         public IActionResult AddItem(AddItemRequestDto request)
         {
-            if (request.NameEN == "" || request.NameEN == null || request.NameAR == "" || request.NameAR == null || request.Type == 0 || request.Type < 0)
+            if (request.NameEN == "" || request.NameEN == null || request.NameAR == "" || request.NameAR == null)
             {
                 return BadRequest(new ErrorDto { Code = 400, MessageAr = "القيمة فارغه", MessageEn = "Empty Value" });
 
             }
-            var item = _publicList.GetITemByName(request.NameAR, request.NameEN);
+            var item = _publicList.GetITemByNameForAdd(request.NameAR, request.NameEN);
             if (item)
             {
                 return BadRequest(new ErrorDto()
@@ -77,7 +77,7 @@ namespace GlobalSurveysApp.Controllers.PublicListManagement
             var result = _publicList.GetById(request.Id);
             if (result == null) return NotFound();
 
-            var existingItem = _publicList.GetITemByName(request.NameAR, request.NameAR);
+            var existingItem = _publicList.GetITemByNameForUpdate(request.NameAR, request.NameEN, request.Type, request.Id);
             if (existingItem)
             {
                 return BadRequest(new ErrorDto
@@ -88,16 +88,7 @@ namespace GlobalSurveysApp.Controllers.PublicListManagement
                 });
             }
 
-            var item = _publicList.GetITemByName(request.NameAR, request.NameEN);
-            if (item)
-            {
-                return BadRequest(new ErrorDto()
-                {
-                    Code = 400,
-                    MessageAr = "العنصر موجود مسبقا",
-                    MessageEn = "The item already exists",
-                });
-            }
+
 
             var m = _mapper.Map<PublicList>(request);
             m.UpdatedAt = DateTime.Now;
@@ -118,14 +109,19 @@ namespace GlobalSurveysApp.Controllers.PublicListManagement
         [Authorize(Roles = "Admin"), HttpGet("GetAllItems")]
         public IActionResult GetAllItems(GetAllItemsRequestDto request)
         {
-            var result = _publicList.GetAll();
-            if (result.Any())
+            var result = _publicList.GetAll(request.Type);
+            if (result != null)
             {
-                var list = PagedList<GetAllItemsResponseDto>.ToPagedList(result, request.page, 10);
+                var list = PagedList<GetAllItemsResponseDto>.ToPagedList(result, request.Page, 10);
                 Response.Headers.Add("X-Pagination", System.Text.Json.JsonSerializer.Serialize(list.Paganation));
                 return Ok(list);
             }
-            return NotFound();
+            return Ok(new ErrorDto
+            {
+                Code = 400,
+                MessageAr = "لا يوجد بيانات",
+                MessageEn = "No Data",
+            }); ;
 
         }
 
