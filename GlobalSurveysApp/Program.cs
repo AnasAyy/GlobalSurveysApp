@@ -29,9 +29,16 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
 builder.Services.AddScoped<IEncryptRepo, EncryptRepo>();
-builder.Services.AddScoped<IUserRepo, UserRepo>();
+builder.Services.AddScoped<ILoginRepo, LoginRepo>();
 builder.Services.AddScoped<IRoleRepo, RoleRepo>();
-builder.Services.AddScoped<IPublicList, Public>();
+builder.Services.AddScoped<IPublicListRepo, PublicRepo>();
+builder.Services.AddScoped<IUserRepo, UserRepo>();
+builder.Services.AddScoped<IImageConvertRepo, ImageConvertRepo>();
+builder.Services.AddScoped<IAdvanceRepo, AdvanceRepo>();
+builder.Services.AddScoped<ITimeOffRepo, TimeOffs>();
+builder.Services.AddScoped<DataContext>();
+
+
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
@@ -54,7 +61,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    
+
 }
 
 app.UseHttpsRedirection();

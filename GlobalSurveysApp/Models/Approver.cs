@@ -14,13 +14,15 @@ namespace GlobalSurveysApp.Models
         [Required]
         public int ApproverType { get; set; }
         [Required]
+        public bool CanViewed { get; set; }
+        [Required]
         public RequestStatus Status { get; set; } = RequestStatus.Pending;
         
         public string Note { get; set; } = string.Empty;
-        public DateTime UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; } 
 
         [ForeignKey("UserId")]
-        public int UserId { get; set; }
+        public int? UserId { get; set; }
 
     }
 }

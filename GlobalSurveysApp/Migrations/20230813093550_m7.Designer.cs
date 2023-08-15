@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GlobalSurveysApp.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230731093534_m")]
-    partial class m
+    [Migration("20230813093550_m7")]
+    partial class m7
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,10 +45,16 @@ namespace GlobalSurveysApp.Migrations
                     b.Property<DateTime>("From")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsUpdated")
+                        .HasColumnType("bit");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("To")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("UserId")
@@ -72,6 +78,9 @@ namespace GlobalSurveysApp.Migrations
                     b.Property<int>("ApproverType")
                         .HasColumnType("int");
 
+                    b.Property<bool>("CanViewed")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Note")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -88,7 +97,7 @@ namespace GlobalSurveysApp.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -380,8 +389,8 @@ namespace GlobalSurveysApp.Migrations
                     b.Property<int>("Gender")
                         .HasColumnType("int");
 
-                    b.Property<string>("IdCard")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<byte[]>("IdCard")
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -470,9 +479,7 @@ namespace GlobalSurveysApp.Migrations
                 {
                     b.HasOne("GlobalSurveysApp.Models.User", null)
                         .WithMany("Approvers")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("GlobalSurveysApp.Models.Complaint", b =>

@@ -22,10 +22,13 @@ namespace GlobalSurveysApp.Models
         public DateTime CreatedAt { get; set;} = DateTime.Now;
         [Required]
         public RequestStatus Status { get; set; } = RequestStatus.Pending;
+        
+        public bool IsUpdated { get; set; } = false;
         [Required]
         public int UserId { get; set; }
         [Required]
         public int SubstituteEmployeeId { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
         [ForeignKey("UserId")]
         public virtual User User { get; set; } = null!;

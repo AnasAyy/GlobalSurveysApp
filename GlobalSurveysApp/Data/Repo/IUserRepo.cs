@@ -1,20 +1,27 @@
-﻿using GlobalSurveysApp.Dtos.UserManagmentDtos.LoginManagement;
+﻿using GlobalSurveysApp.Dtos.PublicListDtos;
+using GlobalSurveysApp.Dtos.UserManagmentDtos.UserDtos;
 using GlobalSurveysApp.Models;
-
+using Microsoft.EntityFrameworkCore;
 
 namespace GlobalSurveysApp.Data.Repo
 {
-    public interface IUserRepo 
+    public interface IUserRepo
     {
-        public User? LoginViaUserName(LoginViaUsernameRequestDto request);
-        public User? LoginViaQRcode(LoginViaQRcodeRequestDto request);
+        public void Create(User user);
         public void Update(User user);
         public User? GetUserById(int id);
+        public  Task<User?> GetUserByIdAsync(int id);
+        
+        public IQueryable<GetAllUSersResponseDto> GetUserByName(string name);
+        public IQueryable<GetAllUSersResponseDto> GetUserByType(bool type);
+        public IQueryable<GetAllUSersResponseDto> GetAllUsers();
+        public bool IsExits(string privateMobalie);
+        public IQueryable<ViewUserResponceDto> GetUserDetails(int id);
+        public GetPublicListResponceDto GetPublicList();
+        public Task<List<Role>> GetRole();
+        public IQueryable<GetDirectResponsibleResponseDto> GetDirectResponsible();
+
         public bool SaveChanges();
-        public bool IsVerified(int id);
-        public void CreateFCM(FCMtoken fCMtoken);
-        
-        
     }
 
     public class UserRepo : IUserRepo
@@ -26,39 +33,132 @@ namespace GlobalSurveysApp.Data.Repo
             _context = context;
         }
 
-        public User? LoginViaUserName(LoginViaUsernameRequestDto request)
+        public void Create(User user)
         {
-            var result = _context.Users.SingleOrDefault(x => x.UserName == request.Username && x.Password == request.Password);
-            if (result != null)
-            {
-                return result;
-            }
-            return null;
+            _context.Users.Add(user);
         }
 
-        public User? LoginViaQRcode(LoginViaQRcodeRequestDto request)
+
+        public IQueryable<GetAllUSersResponseDto> GetAllUsers()
         {
-            var result = _context.Users.SingleOrDefault(x => x.QRcode == request.QRcode);
-            if (result != null)
-            {
-                return result;
-            }
-            return null;
+            return from u in _context.Users
+                   select new GetAllUSersResponseDto
+                   {
+                       Id = u.Id,
+                       Name = u.FirstName + " " + u.LastName,
+                       PhoneNumber = u.PrivateMobile,
+                       IsActive = u.IsActive,
+                   };
         }
 
-        public bool IsUserExist(LoginViaUsernameRequestDto request)
+
+        public GetPublicListResponceDto GetPublicList()
         {
-            return _context.Users.Any(x => x.UserName == request.Username && x.Password == request.Password);
+            var P = new GetPublicListResponceDto();
+
+            P.PlaceOfBirth = GetPublicsListByType(1014);
+            P.CertificateLevel = GetPublicsListByType(1009);
+            P.FieldOfStudy = GetPublicsListByType(1010);
+            P.Gender = GetPublicsListByType(1008);
+            P.Postion = GetPublicsListByType(1011);
+            P.Nationality = GetPublicsListByType(1012);
+            P.Department = GetPublicsListByType(1013);
+            P.Location = GetPublicsListByType(1007);
+
+            return P;
         }
 
-        public void Update(User user)
+        private List<Publics> GetPublicsListByType(int type)
         {
-            _context.Users.Update(user);
+            return _context.PublicLists
+                .Where(x => x.Type == type)
+                .Select(x => new Publics
+                {
+                    Id = x.Id,
+                    NameAR = x.NameAR,
+                    NameEN = x.NameEN
+                })
+                .ToList();
         }
 
         public User? GetUserById(int id)
         {
-            return _context.Users.SingleOrDefault(x => x.Id == id);
+            var user = _context.Users.SingleOrDefault(x => x.Id == id);
+            _context.ChangeTracker.Clear();
+            return user;
+        }
+
+        public IQueryable<GetAllUSersResponseDto> GetUserByName(string name)
+        {
+            return from u in _context.Users
+                   where (u.FirstName + " " + u.SecondName + " " + u.ThirdName + " " + u.LastName).Contains(name)
+                   select new GetAllUSersResponseDto
+                   {
+                       Id = u.Id,
+                       Name = u.FirstName + " " + u.LastName,
+                       PhoneNumber = u.PrivateMobile,
+                       IsActive = u.IsActive,
+                   };
+        }
+
+        public IQueryable<GetAllUSersResponseDto> GetUserByType(bool type)
+        {
+            return from u in _context.Users
+                   where u.IsActive == type
+                   select new GetAllUSersResponseDto
+                   {
+                       Id = u.Id,
+                       Name = u.FirstName + " " + u.LastName,
+                       PhoneNumber = u.PrivateMobile,
+                       IsActive = u.IsActive,
+                   };
+        }
+
+
+
+        public IQueryable<ViewUserResponceDto> GetUserDetails(int id)
+        {
+            var query = from u in _context.Users
+                        join r in _context.Roles on u.RoleId equals r.Id
+                        where u.Id == id
+                        select new ViewUserResponceDto
+                        {
+                            Id = u.Id,
+                            FirstName = u.FirstName,
+                            SecondName = u.SecondName,
+                            ThirdName = u.ThirdName,
+                            LastName = u.LastName,
+                            WorkMobile = u.WorkMobile,
+                            PrivateMobile = u.PrivateMobile,
+                            PlaceOfBirth = u.placeOfBirth,
+                            DateOfBirth = u.DateOfBirth,
+                            CertificateLevel = u.CertificateLevel,
+                            FieldOfStudy = u.FieldOfStudy,
+                            PassportNumber = u.PassportNumber,
+                            Gender = u.Gender,
+                            FirstContractDate = u.FirstContractDate,
+                            Position = u.Postion,
+                            Nationality = u.Nationality,
+                            Email = u.Email,
+                            Department = u.Department,
+                            Location = u.Location,
+                            DirectResponsibleId = u.DirectResponsibleId,
+                            Status = u.IsActive,
+                            Role = r.Title,
+                            CreatedAt = u.CreatedAt,
+                            LastUpdatedAt = u.UpdatedAt,
+                            LastLogIn = u.LastLogin,
+                        };
+
+            return query;
+        }
+
+
+
+
+        public bool IsExits(string privateMobalie)
+        {
+            return _context.Users.Any(x => x.PrivateMobile == privateMobalie);
         }
 
         public bool SaveChanges()
@@ -75,20 +175,35 @@ namespace GlobalSurveysApp.Data.Repo
             return false;
         }
 
-        public bool IsVerified(int id)
+        public void Update(User user)
         {
 
-            var result = _context.Users.SingleOrDefault(_x => _x.Id == id);
-
-            return result != null ? result.IsVerified : false;
-
+            _context.Users.Update(user);
         }
 
-        public void CreateFCM(FCMtoken fCMtoken)
+        public IQueryable<GetDirectResponsibleResponseDto> GetDirectResponsible()
         {
-            _context.FCMtokens.Add(fCMtoken);
+            return from r in _context.Roles
+                   join u in _context.Users on r.Id equals u.RoleId
+                   where r.Title == "Direct responsible"
+                   select new GetDirectResponsibleResponseDto {
+                       Id = u.Id,
+                       Name = u.FirstName + " " + u.LastName
+                   };
         }
 
         
+        public async Task<User?> GetUserByIdAsync(int id)
+        {
+            var user = await _context.Users.SingleOrDefaultAsync(x => x.Id == id);
+            _context.ChangeTracker.Clear();
+            return user;
+        }
+
+        public async Task<List<Role>> GetRole()
+        {
+            return await _context.Roles.ToListAsync();
+        }
     }
+
 }

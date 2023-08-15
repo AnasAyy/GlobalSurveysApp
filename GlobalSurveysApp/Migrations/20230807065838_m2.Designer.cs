@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GlobalSurveysApp.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230731073844_m3")]
-    partial class m3
+    [Migration("20230807065838_m2")]
+    partial class m2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -254,12 +254,8 @@ namespace GlobalSurveysApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Parent")
+                    b.Property<int>("Type")
                         .HasColumnType("int");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -384,6 +380,10 @@ namespace GlobalSurveysApp.Migrations
                     b.Property<int>("Gender")
                         .HasColumnType("int");
 
+                    b.Property<byte[]>("IdCard")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -408,6 +408,9 @@ namespace GlobalSurveysApp.Migrations
 
                     b.Property<string>("Password")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PersonalPhoto")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Postion")

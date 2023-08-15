@@ -18,6 +18,8 @@ namespace GlobalSurveysApp.Models
         [Required]
         public DateTime CreateAt { get; set; }
         [Required]
+        public bool IsUpdated { get; set; } = false;
+        public DateTime? UpdatedAt { get; set; }
         public RequestStatus Status { get; set; } = RequestStatus.Pending;
         [ForeignKey("UserId")]
         public int UserId { get; set; }

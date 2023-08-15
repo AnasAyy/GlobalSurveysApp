@@ -49,22 +49,22 @@ namespace GlobalSurveysApp.Models
         public int Location { get; set; }
         
         [Required]
-        public string UserName { get; set;} = null!;
+        public string UserName { get; set;} = null!;//
         [Required]
-        public string Password { get; set; }= null!;
+        public string Password { get; set; }= null!;//
         [Required] 
         public string QRcode { get; set; } = null!;
-        
-        public string?  IdCard { get; set; }
-        public string? PersonalPhoto { get; set; }
+
+        public byte[]? IdCard { get; set; } = null!;
+        public string? PersonalPhoto { get; set; }//
         [Required]
         public bool IsActive { get; set; } = true;
         [Required]
-        public bool IsVerified { get; set; } = false;
-        public DateTime? LastLogin { get; set; }
+        public bool IsVerified { get; set; } = false;//
+        public DateTime? LastLogin { get; set; }//
         [Required]
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;//
+        public DateTime? UpdatedAt { get; set; }//
         public int? DirectResponsibleId { get; set; }
         [ForeignKey("DirectResponsibleId")]
         public virtual User DirectResponsible { get; set; } = null!;

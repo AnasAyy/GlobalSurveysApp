@@ -15,10 +15,10 @@ namespace GlobalSurveysApp.Controllers.PublicListManagement
     [ApiController]
     public class PublicListController : ControllerBase
     {
-        private readonly IPublicList _publicList;
+        private readonly IPublicListRepo _publicList;
         private readonly IMapper _mapper;
 
-        public PublicListController(IPublicList publicList, IMapper mapper)
+        public PublicListController(IPublicListRepo publicList, IMapper mapper)
         {
             _publicList = publicList;
             _mapper = mapper;

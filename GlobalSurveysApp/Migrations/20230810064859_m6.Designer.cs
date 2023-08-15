@@ -4,6 +4,7 @@ using GlobalSurveysApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GlobalSurveysApp.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230810064859_m6")]
+    partial class m6
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,7 +54,7 @@ namespace GlobalSurveysApp.Migrations
                     b.Property<DateTime>("To")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("UserId")
@@ -74,9 +77,6 @@ namespace GlobalSurveysApp.Migrations
 
                     b.Property<int>("ApproverType")
                         .HasColumnType("int");
-
-                    b.Property<bool>("CanViewed")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Note")
                         .IsRequired()
@@ -319,9 +319,6 @@ namespace GlobalSurveysApp.Migrations
                     b.Property<DateTime>("From")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsUpdated")
-                        .HasColumnType("bit");
-
                     b.Property<int>("Number")
                         .HasColumnType("int");
 
@@ -336,9 +333,6 @@ namespace GlobalSurveysApp.Migrations
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");

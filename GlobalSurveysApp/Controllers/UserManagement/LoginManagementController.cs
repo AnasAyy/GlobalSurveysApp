@@ -20,11 +20,11 @@ namespace GlobalSurveysApp.Controllers.UserManagement
     {
         private readonly IConfiguration _configuration;
         private readonly IEncryptRepo _encryptRepo;
-        private readonly IUserRepo _userRepo;
+        private readonly ILoginRepo _userRepo;
         private readonly IMapper _mapper;
         private readonly IRoleRepo _role;
 
-        public LoginManagementController(IConfiguration configuration, IEncryptRepo encryptRepo, IUserRepo userRepo,IRoleRepo roleRepo, IMapper mapper)
+        public LoginManagementController(IConfiguration configuration, IEncryptRepo encryptRepo, ILoginRepo userRepo,IRoleRepo roleRepo, IMapper mapper)
         {
             _configuration = configuration;
             _encryptRepo = encryptRepo;
@@ -71,6 +71,16 @@ namespace GlobalSurveysApp.Controllers.UserManagement
             }
             #endregion
 
+            #region Get User Role
+            string role = _role.GetRoleById(user.RoleId);
+
+            #endregion
+
+            #region Last Login
+            user.LastLogin= DateTime.Now;
+            _userRepo.Update(user);
+            #endregion
+
             #region Create Token
             var subject = _configuration["Jwt:Subject"];
             var keyhash = _configuration["Jwt:Key"];
@@ -86,7 +96,8 @@ namespace GlobalSurveysApp.Controllers.UserManagement
                         new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
                         new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                         new Claim(ClaimTypes.Name, user.Id.ToString()),
-                        
+                        new Claim(ClaimTypes.Role, role),
+
 
                     };
 
@@ -112,7 +123,7 @@ namespace GlobalSurveysApp.Controllers.UserManagement
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     PhoneNumber = user.WorkMobile,
-                    UserRole = "Admin",
+                    UserRole = role,
                     IsVerified = user.IsVerified,
                 }
 
@@ -196,38 +207,14 @@ namespace GlobalSurveysApp.Controllers.UserManagement
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     PhoneNumber = user.WorkMobile,
-                    UserRole = "Admin",
+                    UserRole = role,
                     IsVerified = user.IsVerified,
                 }
             });
             #endregion
         }
 
-        //[Authorize, HttpGet("IsVerified")]
-        //public IActionResult IsVerified()
-        //{
-        //    #region Check Token Data
-        //    var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
-        //    if (userId == null)
-        //    {
-        //        return Unauthorized();
-        //    }
-        //    #endregion
-
-
-        //    #region Check User Status
-        //    if (!_userRepo.IsVerified(Convert.ToInt32(userId.Value)))
-        //        return BadRequest(new ErrorDto
-        //        {
-        //            Code = 400,
-        //            MessageAr = "",
-        //            MessageEn = "",
-        //        });
-        //    #endregion
-
-
-        //    return Ok("OK");
-        //}
+        
 
         [Authorize, HttpPut("AddFCMtoken")]
         public IActionResult AddFCMtoken(FCMtokenRequestDto request)
@@ -247,15 +234,19 @@ namespace GlobalSurveysApp.Controllers.UserManagement
             {
                 return NotFound(new ErrorDto()
                 {
-                    Code = 404,
-                    MessageAr = "",
-                    MessageEn = ""
+                    Code = 400,
+                    MessageAr = "عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+                    MessageEn = "Oops, something went wrong. Please try again.",
                 });
             }
             #endregion
 
+            #region Delete Exits FCM
+            _userRepo.DeleteFCM(result.Id);
+            #endregion
+
             #region Add FCMtoken
-            var FCMtoken = new FCMtoken();
+            FCMtoken FCMtoken = new FCMtoken();
             FCMtoken.Token = request.FCMtoken;
             FCMtoken.UserId = result.Id;
             _userRepo.CreateFCM(FCMtoken);

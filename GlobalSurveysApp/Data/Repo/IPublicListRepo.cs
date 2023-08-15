@@ -4,7 +4,7 @@ using static Azure.Core.HttpHeader;
 
 namespace GlobalSurveysApp.Data.Repo
 {
-    public interface IPublicList
+    public interface IPublicListRepo
     {
         public void Create(PublicList publicList);
         public void Update(PublicList publicList);
@@ -14,15 +14,16 @@ namespace GlobalSurveysApp.Data.Repo
         public bool GetITemByNameForAdd(string nameAR, string nameEN);
         public bool GetITemByNameForUpdate(string nameAR, string nameEN, int type, int id);
         public PublicList? GetById(int id);
+        
         public bool SaveChanges();
 
     }
 
-    public class Public : IPublicList
+    public class PublicRepo : IPublicListRepo
     {
         private readonly DataContext _context;
 
-        public Public(DataContext context)
+        public PublicRepo(DataContext context)
         {
             _context = context;
         }

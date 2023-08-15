@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GlobalSurveysApp.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230727110718_m1")]
-    partial class m1
+    [Migration("20230809110710_m4")]
+    partial class m4
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,6 +44,9 @@ namespace GlobalSurveysApp.Migrations
 
                     b.Property<DateTime>("From")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsNotUpdated")
+                        .HasColumnType("bit");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -88,7 +91,7 @@ namespace GlobalSurveysApp.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -243,17 +246,22 @@ namespace GlobalSurveysApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("NameAR")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("NameEn")
+                    b.Property<string>("NameEN")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -343,7 +351,13 @@ namespace GlobalSurveysApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CertificateLevel")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Department")
@@ -356,9 +370,21 @@ namespace GlobalSurveysApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("FieldOfStudy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FirstContractDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Gender")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("IdCard")
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -376,11 +402,23 @@ namespace GlobalSurveysApp.Migrations
                     b.Property<int>("Location")
                         .HasColumnType("int");
 
+                    b.Property<int>("Nationality")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PassportNumber")
+                        .HasColumnType("int");
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PhoneNumber")
+                    b.Property<string>("PersonalPhoto")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Postion")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PrivateMobile")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -406,6 +444,13 @@ namespace GlobalSurveysApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("WorkMobile")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("placeOfBirth")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DirectResponsibleId");
@@ -428,9 +473,7 @@ namespace GlobalSurveysApp.Migrations
                 {
                     b.HasOne("GlobalSurveysApp.Models.User", null)
                         .WithMany("Approvers")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("GlobalSurveysApp.Models.Complaint", b =>
