@@ -10,6 +10,7 @@ using System.Security.Claims;
 using GlobalSurveysApp.Dtos.TimeOffDtos;
 using System.Threading;
 using Microsoft.EntityFrameworkCore;
+using GlobalSurveysApp.Dtos.ApproveDtos;
 
 namespace GlobalSurveysApp.Controllers.TimeOffManagement
 {
@@ -471,6 +472,172 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
                 MessageAr = "لا يوجد بيانات",
                 MessageEn = "No Data",
             });
+        }
+
+        [Authorize(Roles = "Manager, Direct responsible, HR"), HttpPut("Approve")]
+        public async Task<IActionResult> Approve(ApproveRequestDto request)
+        {
+            #region Check Token Data
+            var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
+            var userRole = HttpContext.User.FindFirst(ClaimTypes.Role);
+            if (userId == null || userRole == null)
+            {
+                return Unauthorized();
+            }
+            #endregion
+            FCMtokenResponseDto FC = new FCMtokenResponseDto();
+            var timeOff = _timeOffRepo.GetTimeOffById(request.RequestId);
+
+            var result = await _timeOffRepo.GetApprover(request.RequestId, Convert.ToInt32(userId.Value));
+            if (result == null || timeOff == null)
+            {
+                return BadRequest(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "حاول مجددا",
+                    MessageEn = "Try Again",
+                });
+            }
+
+            if (userRole.Value == "Direct responsible")
+            {
+                if (request.Status == 1)
+                {
+                    result.Status = RequestStatus.Accepted;
+
+                }
+                if (request.Status == 2)
+                {
+                    result.Status = RequestStatus.Rejected;
+                }
+                result.Note = request.Note;
+                result.CanViewed = false;
+                result.UpdatedAt = DateTime.Now;
+                await _timeOffRepo.UpdateApprover(result);
+
+                int hr = await _timeOffRepo.GetIdByRole("HR").FirstOrDefaultAsync();
+                result = await _timeOffRepo.GetApprover(request.RequestId, hr);
+
+
+                if (result != null)
+                {
+                    result.CanViewed = true;
+                    await _timeOffRepo.UpdateApprover(result);
+                    FC.MessageAR = "طلب اجازة جديد";
+                    FC.MessageEN = "New Time Off request ";
+                    FC.FCMToken = await _timeOffRepo.GetFCM(hr);
+                }
+
+                timeOff.IsUpdated = true;
+
+            }
+
+            if (result == null)
+            {
+                return BadRequest(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "حاول مجددا",
+                    MessageEn = "Try Again",
+                });
+            }
+            if (userRole.Value == "HR")
+            {
+                if (request.Status == 1)
+                {
+                    result.Status = RequestStatus.Accepted;
+                }
+                if (request.Status == 2)
+                {
+                    result.Status = RequestStatus.Rejected;
+                }
+                result.Note = request.Note;
+                result.CanViewed = false;
+                result.UpdatedAt = DateTime.Now;
+                await _timeOffRepo.UpdateApprover(result);
+
+                int manager = await _timeOffRepo.GetIdByRole("Manager").FirstOrDefaultAsync();
+                result = await _timeOffRepo.GetApprover(request.RequestId, manager);
+
+
+                if (result != null)
+                {
+                    result.CanViewed = true;
+                    await _timeOffRepo.UpdateApprover(result);
+                    FC.MessageAR = "طلب أجازة جديد  ";
+                    FC.MessageEN = "New Time Off request ";
+                    FC.FCMToken = await _timeOffRepo.GetFCM(manager);
+                }
+                timeOff.IsUpdated = true;
+
+            }
+            if (result == null)
+            {
+                return BadRequest(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "حاول مجددا",
+                    MessageEn = "Try Again",
+                });
+            }
+
+
+            if (userRole.Value == "Manager")
+            {
+                if (request.Status == 1)
+                {
+                    result.Status = RequestStatus.Accepted;
+                    result.Note = request.Note;
+                    result.UpdatedAt = DateTime.Now;
+                    result.CanViewed = false;
+                    await _timeOffRepo.UpdateApprover(result);
+                    var requestUser = _timeOffRepo.GetTimeOffById(result.RequestId);
+                    if (requestUser == null)
+                    {
+                        return BadRequest();
+                    }
+                    timeOff.Status = RequestStatus.Accepted;
+
+                    FC.MessageAR = "تم قبول طلب الاجازة الخاص بك ";
+                    FC.MessageEN = "Your Time Off request has been accepted ";
+                    FC.FCMToken = await _timeOffRepo.GetFCM(Convert.ToInt32(requestUser.UserId));
+                }
+                if (request.Status == 2)
+                {
+                    result.Status = RequestStatus.Rejected;
+                    result.Note = request.Note;
+                    result.UpdatedAt = DateTime.Now;
+                    await _timeOffRepo.UpdateApprover(result);
+                    var requestUser = _timeOffRepo.GetTimeOffById(result.RequestId);
+                    if (requestUser == null)
+                    {
+                        return BadRequest();
+                    }
+                    timeOff.Status = RequestStatus.Rejected;
+
+                    FC.MessageAR = "تم رفض طلب الاجازة الخاص بك ";
+                    FC.MessageEN = "Your Time Off request has been rejected ";
+                    FC.FCMToken = await _timeOffRepo.GetFCM(Convert.ToInt32(requestUser.UserId));
+                }
+                timeOff.IsUpdated = true;
+            }
+            _timeOffRepo.UpdateTimeOff(timeOff);
+            if (!_userRepo.SaveChanges())
+            {
+                return BadRequest(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+                    MessageEn = "Oops, something went wrong. Please try again.",
+                });
+            }
+            return new JsonResult(new
+            {
+                code = 200,
+                FC,
+            });
+
+
         }
     }
 }

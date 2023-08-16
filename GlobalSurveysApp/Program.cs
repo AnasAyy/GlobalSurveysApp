@@ -36,7 +36,6 @@ builder.Services.AddScoped<IUserRepo, UserRepo>();
 builder.Services.AddScoped<IImageConvertRepo, ImageConvertRepo>();
 builder.Services.AddScoped<IAdvanceRepo, AdvanceRepo>();
 builder.Services.AddScoped<ITimeOffRepo, TimeOffs>();
-builder.Services.AddScoped<DataContext>();
 
 
 

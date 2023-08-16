@@ -10,7 +10,7 @@ namespace GlobalSurveysApp.Data.Repo
         public Task<int> CreateAdvance(Advance advance);
         public  Task CreateApprover(List<Approver> approver);
         public void  Update(Advance advance);
-        public void UpdateApprover(Approver approver);
+        public Task UpdateApprover(Approver approver);
         public Task<IQueryable<GetAllAdvanceResponseDto>> GetAllAdvanceForUser(int id);
         public Task<IQueryable<GetAllAdvanceResponseDto>> GetAdvanceForUserByDate(int id, DateTime From, DateTime to);
         public Task<List<Approver>> GetApproversByRequestId(int id);
@@ -126,9 +126,12 @@ namespace GlobalSurveysApp.Data.Repo
         {
              _context.Advances.Update(advance);
         }
-        public void UpdateApprover(Approver approver)
+        public async Task UpdateApprover(Approver approver)
         {
-            _context.Approvers.Update(approver);
+            
+                _context.Approvers.Update(approver);
+                await _context.SaveChangesAsync();
+            
         }
 
         public async Task<string> GetFCM(int? id)
@@ -159,18 +162,17 @@ namespace GlobalSurveysApp.Data.Repo
 
         public async Task<List<Publics>> GetCurrency()
         {
-            return await Task.Run(() =>
-            {
-                return _context.PublicLists
-                    .Where(x => x.Type == 1028)
-                    .Select(x => new Publics
-                    {
-                        Id = x.Id,
-                        NameAR = x.NameAR,
-                        NameEN = x.NameEN
-                    })
-                    .ToList();
-            });
+            var currencies = await _context.PublicLists
+                .Where(x => x.Type == 1028)
+                .Select(x => new Publics
+                {
+                    Id = x.Id,
+                    NameAR = x.NameAR,
+                    NameEN = x.NameEN
+                })
+                .ToListAsync();
+
+            return currencies;
         }
 
         public async Task<IQueryable<GetAdvanceForApproverResponseDto>> GetAdvanceForApprover(int id)

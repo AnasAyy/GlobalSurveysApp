@@ -3,6 +3,7 @@ using Azure.Core;
 using GlobalSurveysApp.Data.Repo;
 using GlobalSurveysApp.Dtos;
 using GlobalSurveysApp.Dtos.AdvanceDtos;
+using GlobalSurveysApp.Dtos.ApproveDtos;
 using GlobalSurveysApp.Dtos.UserManagmentDtos.UserDtos;
 using GlobalSurveysApp.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -463,7 +464,7 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
             }
             #endregion
             FCMtokenResponseDto FC = new FCMtokenResponseDto();
-            var advance = _advanceRepo.GetAdvanceById(request.RequestId);
+            var advance =  _advanceRepo.GetAdvanceById(request.RequestId);
            
             var result = await _advanceRepo.GetApprover(request.RequestId, Convert.ToInt32(userId.Value));
             if (result == null || advance == null)
@@ -489,7 +490,8 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
                 }
                 result.Note = request.Note;
                 result.CanViewed = false;
-                _advanceRepo.UpdateApprover(result);
+                result.UpdatedAt = DateTime.Now;
+                await _advanceRepo.UpdateApprover(result);
 
                 int hr = await _advanceRepo.GetIdByRole("HR").FirstOrDefaultAsync();
                 result = await _advanceRepo.GetApprover(request.RequestId, hr);
@@ -498,7 +500,7 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
                 if (result != null)
                 {
                     result.CanViewed = true;
-                    _advanceRepo.UpdateApprover(result);
+                    await _advanceRepo.UpdateApprover(result);
                     FC.MessageAR = "طلب سلفة جديد";
                     FC.MessageEN = "New Advance request ";
                     FC.FCMToken = await _advanceRepo.GetFCM(hr);
@@ -529,7 +531,8 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
                 }
                 result.Note = request.Note;
                 result.CanViewed = false;
-                _advanceRepo.UpdateApprover(result);
+                result.UpdatedAt = DateTime.Now;
+                await _advanceRepo.UpdateApprover(result);
 
                 int manager = await _advanceRepo.GetIdByRole("Manager").FirstOrDefaultAsync();
                 result = await _advanceRepo.GetApprover(request.RequestId, manager);
@@ -538,7 +541,7 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
                 if (result != null)
                 {
                     result.CanViewed = true;
-                    _advanceRepo.UpdateApprover(result);
+                    await _advanceRepo.UpdateApprover(result);
                     FC.MessageAR = "طلب سلفة جديد  ";
                     FC.MessageEN = "New Advance request ";
                     FC.FCMToken = await _advanceRepo.GetFCM(manager);
@@ -564,7 +567,8 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
                     result.Status = RequestStatus.Accepted;
                     result.Note = request.Note;
                     result.CanViewed = false;
-                    _advanceRepo.UpdateApprover(result);
+                    result.UpdatedAt = DateTime.Now;
+                    await _advanceRepo.UpdateApprover(result);
                     var requestUser =  _advanceRepo.GetAdvanceById(result.RequestId);
                     if(requestUser == null)
                     {
@@ -580,7 +584,8 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
                 {
                     result.Status = RequestStatus.Rejected;
                     result.Note = request.Note;
-                    _advanceRepo.UpdateApprover(result);
+                    result.UpdatedAt = DateTime.Now;
+                    await _advanceRepo.UpdateApprover(result);
                     var requestUser = _advanceRepo.GetAdvanceById(result.RequestId);
                     if (requestUser == null)
                     {

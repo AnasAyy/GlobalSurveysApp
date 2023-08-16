@@ -30,7 +30,9 @@ namespace GlobalSurveysApp.Data.Repo
 
         public Task<IQueryable<GetTimeOffForApproverResponseDto>> GetTimeOffForApproverByDate(int id, DateTime From, DateTime to);
 
-        public  Task<IQueryable<GetTimeOffForApproverResponseDto>> GetTimeOffForApproverByName(int id, string name);
+        public Task<IQueryable<GetTimeOffForApproverResponseDto>> GetTimeOffForApproverByName(int id, string name);
+        public Task<Approver?> GetApprover(int requestId, int approvalId);
+        public Task UpdateApprover(Approver approver);
         public Task<bool> SaveChanges();
     }
 
@@ -106,7 +108,7 @@ namespace GlobalSurveysApp.Data.Repo
 
             return await Task.FromResult(query);
         }
-        
+
         public async Task<IQueryable<GetAllTimeOffResponseDto>> GetTimeForUserByDate(int id, DateTime From, DateTime to)
         {
             var query = from timeOff in _context.TimeOffs
@@ -123,21 +125,21 @@ namespace GlobalSurveysApp.Data.Repo
 
             return await Task.FromResult(query);
         }
-        
+
         public TimeOff? GetTimeOffById(int id)
         {
             var timeOff = _context.TimeOffs.SingleOrDefault(x => x.Id == id);
             _context.ChangeTracker.Clear();
             return timeOff;
         }
-        
+
         public void UpdateTimeOff(TimeOff timeOff)
         {
 
             _context.TimeOffs.Update(timeOff);
 
         }
-        
+
         public async Task<List<Approver>> GetApproversByRequestId(int id)
         {
             var approvers = await _context.Approvers
@@ -149,31 +151,32 @@ namespace GlobalSurveysApp.Data.Repo
 
         public async Task<List<GetSubsituteEmployeeResponseDto>> GetSubsituteEmployee()
         {
-            var users = await _context.Users.ToListAsync();
 
-            var substitutes = users.Select(user => new GetSubsituteEmployeeResponseDto
+
+            var substitutes = await _context.Users
+            .Select(user => new GetSubsituteEmployeeResponseDto
             {
                 Id = user.Id,
                 Name = user.FirstName + " " + user.LastName
-            }).ToList();
+            })
+              .ToListAsync();
 
             return substitutes;
         }
 
         public async Task<List<Publics>> GetTypes()
         {
-            return await Task.Run(() =>
-            {
-                return _context.PublicLists
-                    .Where(x => x.Type == 1031)
-                    .Select(x => new Publics
-                    {
-                        Id = x.Id,
-                        NameAR = x.NameAR,
-                        NameEN = x.NameEN
-                    })
-                    .ToList();
-            });
+            var types = await _context.PublicLists
+                .Where(x => x.Type == 1031)
+                .Select(x => new Publics
+                {
+                    Id = x.Id,
+                    NameAR = x.NameAR,
+                    NameEN = x.NameEN
+                })
+                .ToListAsync();
+
+            return types;
         }
 
         public async Task<IQueryable<GetTimeOffForApproverResponseDto>> GetTimeOffForApprover(int id)
@@ -217,8 +220,8 @@ namespace GlobalSurveysApp.Data.Repo
                         };
             return await Task.FromResult(query);
         }
-        
-        
+
+
         public async Task<IQueryable<GetTimeOffForApproverResponseDto>> GetTimeOffForApproverByName(int id, string name)
         {
             var query = from ap in _context.Approvers
@@ -240,6 +243,25 @@ namespace GlobalSurveysApp.Data.Repo
             return await Task.FromResult(query);
         }
 
+        public async Task<Approver?> GetApprover(int requestId, int approvalId)
+        {
+
+
+            var approver = await _context.Approvers
+                .FirstOrDefaultAsync(x => x.RequestId == requestId && x.UserId == approvalId && x.RequestType == 2);
+            _context.ChangeTracker.Clear();
+            return approver;
+        }
+
+        public async Task UpdateApprover(Approver approver)
+        {
+
+            _context.Approvers.Update(approver);
+            await _context.SaveChangesAsync();
+
+        }
+
+
 
         public async Task<bool> SaveChanges()
         {
@@ -255,6 +277,6 @@ namespace GlobalSurveysApp.Data.Repo
             return false;
         }
 
-        
+
     }
 }
