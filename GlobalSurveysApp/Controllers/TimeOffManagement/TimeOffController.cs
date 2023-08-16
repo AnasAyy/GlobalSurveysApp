@@ -173,7 +173,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
         }
 
         [Authorize(Roles = "Normal user, Direct responsible, HR"), HttpGet("ViewUserTimeOff")]
-        public async Task<IActionResult> ViewUserAdvance(GetUserTimeOffRequestDto request)
+        public async Task<IActionResult> ViewUserTimeOff(GetUserTimeOffRequestDto request)
         {
             #region Check Token Data
             var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
