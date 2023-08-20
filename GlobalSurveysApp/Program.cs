@@ -2,9 +2,12 @@ using GlobalSurveysApp.Data;
 using GlobalSurveysApp.Data.Repo;
 using GlobalSurveysApp.Data.Repos;
 using GlobalSurveysApp.Models;
+using Hangfire;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Data.Common;
 using System.Text;
 
 
@@ -19,6 +22,24 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 }
 );
+
+
+
+
+builder.Services.AddHangfire(configuration => configuration
+.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+.UseSimpleAssemblyNameTypeSerializer()
+.UseRecommendedSerializerSettings()
+.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"), new Hangfire.SqlServer.SqlServerStorageOptions
+{
+    CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+    SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+    QueuePollInterval = TimeSpan.Zero,
+    UseRecommendedIsolationLevel = true,
+    DisableGlobalLocks = true,
+}));
+
+
 
 
 

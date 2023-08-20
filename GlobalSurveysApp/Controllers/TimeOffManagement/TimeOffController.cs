@@ -223,8 +223,8 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
             }); ;
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible, HR"), HttpPut("UpdateAdvance")]
-        public IActionResult UpdateAdvance(UpdateTimeOffRequestDto request)
+        [Authorize(Roles = "Normal user, Direct responsible, HR"), HttpPut("UpdateTimeOff")]
+        public IActionResult UpdateTimeOff(UpdateTimeOffRequestDto request)
         {
             var result = _timeOffRepo.GetTimeOffById(request.Id);
             if (result == null)

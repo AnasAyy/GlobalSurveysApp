@@ -1,7 +1,9 @@
 ﻿using GlobalSurveysApp.Dtos.ComplaintDtos;
 using GlobalSurveysApp.Dtos.TimeOffDtos;
+using GlobalSurveysApp.Dtos.UserManagmentDtos.UserDtos;
 using GlobalSurveysApp.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Threading;
 
 namespace GlobalSurveysApp.Data.Repo
 {
@@ -13,7 +15,12 @@ namespace GlobalSurveysApp.Data.Repo
         public Task<User?> GetUserById(int id);
         public Task<string> GetFCM(int? id);
         public Task<IQueryable<GetAllComplaintResponseDto>> GetAllComplaintForUser(int id);
+        public Task<IQueryable<GetAllComplaintResponseDto>> GetComplaintForUserByDate(int id, DateTime From, DateTime to);
+        public Complaint? GetComplaintById(int id);
 
+        public void UpdateComplaint(Complaint complaint);
+        public Task<Approver?> GetLastApproverByRequestId(int id);
+        public Task<List<Publics>> GetTitles();
         public Task<bool> SaveChanges();
     }
 
@@ -82,6 +89,64 @@ namespace GlobalSurveysApp.Data.Repo
 
             return await Task.FromResult(query);
         }
+
+        public async Task<IQueryable<GetAllComplaintResponseDto>> GetComplaintForUserByDate(int id, DateTime From, DateTime to)
+        {
+            var query = from complaint in _context.Complaints
+                        where complaint.UserId == id  && complaint.CreatedAt >= From && complaint.CreatedAt <= to
+                        orderby complaint.CreatedAt descending
+                        select new GetAllComplaintResponseDto
+                        {
+                            Id = complaint.Id,
+                            Title = complaint.Title,
+                            IsUpdated = complaint.IsUpdated,
+                            CreateAt = complaint.CreatedAt,
+                            Status = complaint.Status,
+                        };
+
+            return await Task.FromResult(query);
+        }
+
+        public Complaint? GetComplaintById(int id)
+        {
+            var complaint = _context.Complaints.SingleOrDefault(x => x.Id == id);
+            _context.ChangeTracker.Clear();
+            return complaint;
+        }
+
+        public void UpdateComplaint(Complaint complaint)
+        {
+
+            _context.Complaints.Update(complaint);
+
+        }
+
+        public async Task<Approver?> GetLastApproverByRequestId(int id)
+        {
+            var lastApprover = await _context.Approvers
+                .Where(x => x.RequestId == id && x.RequestType == 3)
+                .OrderByDescending(x => x.Id)
+                .FirstOrDefaultAsync();
+
+            return lastApprover;
+        }
+
+        public async Task<List<Publics>> GetTitles()
+        {
+            var types = await _context.PublicLists
+                .Where(x => x.Type == 1033)
+                .Select(x => new Publics
+                {
+                    Id = x.Id,
+                    NameAR = x.NameAR,
+                    NameEN = x.NameEN
+                })
+                .ToListAsync();
+
+            return types;
+        }
+
+
         public async Task<bool> SaveChanges()
         {
             try

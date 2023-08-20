@@ -17,6 +17,7 @@ namespace GlobalSurveysApp.Models
         public bool IsUpdated { get; set; } = false;
         [Required]
         public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
         [Required]
         public RequestStatus Status { get; set; } = RequestStatus.Pending;
 
