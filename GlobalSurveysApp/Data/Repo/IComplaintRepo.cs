@@ -21,6 +21,13 @@ namespace GlobalSurveysApp.Data.Repo
         public void UpdateComplaint(Complaint complaint);
         public Task<Approver?> GetLastApproverByRequestId(int id);
         public Task<List<Publics>> GetTitles();
+        public Task<IQueryable<GetComplaintForApproverResponseDto>> GetComplaintForApprover(int id);
+        public Task<IQueryable<GetComplaintForApproverResponseDto>> GetComplaintForApproverByDate(int id, DateTime From, DateTime to);
+
+        public Task<IQueryable<GetComplaintForApproverResponseDto>> GetComplaintForApproverByName(int id, string name);
+        public Task<Approver?> GetApprover(int requestId, int approvalId);
+        public Task UpdateApprover(Approver approver);
+        
         public Task<bool> SaveChanges();
     }
 
@@ -146,7 +153,85 @@ namespace GlobalSurveysApp.Data.Repo
             return types;
         }
 
+        public async Task<IQueryable<GetComplaintForApproverResponseDto>> GetComplaintForApprover(int id)
+        {
+            var query = from ap in _context.Approvers
+                        join c in _context.Complaints on ap.RequestId equals c.Id
+                        join u in _context.Users on c.UserId equals u.Id
+                        where ap.UserId == id
+                        where ap.RequestType == 3
+                        where ap.CanViewed == true
+                        select new GetComplaintForApproverResponseDto
+                        {
+                            Id = c.Id,
+                            Name = u.FirstName + " " + u.LastName,
+                            Title = c.Title,
+                            TypeAR = "شكوى",
+                            TypeEN = "Complaint",
+                            Date = c.CreatedAt
+                        };
 
+            return await Task.FromResult(query);
+        }
+
+        public async Task<IQueryable<GetComplaintForApproverResponseDto>> GetComplaintForApproverByName(int id, string name)
+        {
+            var query = from ap in _context.Approvers
+                        join c in _context.Complaints on ap.RequestId equals c.Id
+                        join u in _context.Users on c.UserId equals u.Id
+
+                        where ap.UserId == id && (u.FirstName + " " + u.SecondName + " " + u.ThirdName + " " + u.LastName).Contains(name)
+                        where ap.RequestType == 3
+                        where ap.CanViewed == true
+                        select new GetComplaintForApproverResponseDto
+                        {
+                            Id = c.Id,
+                            Name = u.FirstName + " " + u.LastName,
+                            Title = c.Title,
+                            TypeAR = "شكوى",
+                            TypeEN = "Complaint",
+                            Date = c.CreatedAt
+                        };
+            return await Task.FromResult(query);
+        }
+
+        public async Task<IQueryable<GetComplaintForApproverResponseDto>> GetComplaintForApproverByDate(int id, DateTime From, DateTime to)
+        {
+            var query = from ap in _context.Approvers
+                        join c in _context.Complaints on ap.RequestId equals c.Id
+                        join u in _context.Users on c.UserId equals u.Id
+
+                        where ap.UserId == id && c.CreatedAt >= From && c.CreatedAt <= to
+                        where ap.RequestType == 3
+                        where ap.CanViewed == true
+                        select new GetComplaintForApproverResponseDto
+                        {
+                            Id = c.Id,
+                            Name = u.FirstName + " " + u.LastName,
+                            Title = c.Title,
+                            TypeAR = "شكوى",
+                            TypeEN = "Complaint",
+                            Date = c.CreatedAt
+                        };
+            return await Task.FromResult(query);
+        }
+
+        public async Task<Approver?> GetApprover(int requestId, int approvalId)
+        {
+
+
+            var approver = await _context.Approvers
+                .FirstOrDefaultAsync(x => x.RequestId == requestId && x.UserId == approvalId && x.RequestType == 3);
+            _context.ChangeTracker.Clear();
+            return approver;
+        }
+        public async Task UpdateApprover(Approver approver)
+        {
+
+            _context.Approvers.Update(approver);
+            await _context.SaveChangesAsync();
+
+        }
         public async Task<bool> SaveChanges()
         {
             try

@@ -26,18 +26,8 @@ builder.Services.AddDbContext<DataContext>(options =>
 
 
 
-builder.Services.AddHangfire(configuration => configuration
-.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
-.UseSimpleAssemblyNameTypeSerializer()
-.UseRecommendedSerializerSettings()
-.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"), new Hangfire.SqlServer.SqlServerStorageOptions
-{
-    CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
-    SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
-    QueuePollInterval = TimeSpan.Zero,
-    UseRecommendedIsolationLevel = true,
-    DisableGlobalLocks = true,
-}));
+builder.Services.AddHangfire(x => x.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddHangfireServer();
 
 
 
@@ -89,6 +79,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseHangfireDashboard("/dashborad");
 
 app.MapControllers();
 
