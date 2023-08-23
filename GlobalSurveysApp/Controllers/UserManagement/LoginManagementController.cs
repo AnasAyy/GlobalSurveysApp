@@ -120,6 +120,7 @@ namespace GlobalSurveysApp.Controllers.UserManagement
                 Token = stringToken,
                 User = new UserResponceDto()
                 {
+                    Id = user.Id,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     PhoneNumber = user.WorkMobile,
@@ -204,6 +205,7 @@ namespace GlobalSurveysApp.Controllers.UserManagement
                 Token = stringToken,
                 User = new UserResponceDto()
                 {
+                    Id = user.Id,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     PhoneNumber = user.WorkMobile,

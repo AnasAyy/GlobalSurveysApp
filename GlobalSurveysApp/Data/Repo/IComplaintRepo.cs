@@ -1,4 +1,5 @@
-﻿using GlobalSurveysApp.Dtos.ComplaintDtos;
+﻿using Azure.Core;
+using GlobalSurveysApp.Dtos.ComplaintDtos;
 using GlobalSurveysApp.Dtos.TimeOffDtos;
 using GlobalSurveysApp.Dtos.UserManagmentDtos.UserDtos;
 using GlobalSurveysApp.Models;
@@ -27,7 +28,8 @@ namespace GlobalSurveysApp.Data.Repo
         public Task<IQueryable<GetComplaintForApproverResponseDto>> GetComplaintForApproverByName(int id, string name);
         public Task<Approver?> GetApprover(int requestId, int approvalId);
         public Task UpdateApprover(Approver approver);
-        
+
+        public void Complaint_BS();
         public Task<bool> SaveChanges();
     }
 
@@ -100,7 +102,7 @@ namespace GlobalSurveysApp.Data.Repo
         public async Task<IQueryable<GetAllComplaintResponseDto>> GetComplaintForUserByDate(int id, DateTime From, DateTime to)
         {
             var query = from complaint in _context.Complaints
-                        where complaint.UserId == id  && complaint.CreatedAt >= From && complaint.CreatedAt <= to
+                        where complaint.UserId == id && complaint.CreatedAt >= From && complaint.CreatedAt <= to
                         orderby complaint.CreatedAt descending
                         select new GetAllComplaintResponseDto
                         {
@@ -218,8 +220,6 @@ namespace GlobalSurveysApp.Data.Repo
 
         public async Task<Approver?> GetApprover(int requestId, int approvalId)
         {
-
-
             var approver = await _context.Approvers
                 .FirstOrDefaultAsync(x => x.RequestId == requestId && x.UserId == approvalId && x.RequestType == 3);
             _context.ChangeTracker.Clear();
@@ -227,9 +227,59 @@ namespace GlobalSurveysApp.Data.Repo
         }
         public async Task UpdateApprover(Approver approver)
         {
-
             _context.Approvers.Update(approver);
             await _context.SaveChangesAsync();
+        }
+        public void Complaint_BS()
+        {
+
+            try
+            {
+                var twoDaysAgo = DateTime.Now.AddDays(-2);
+
+                var query = from c in _context.Complaints
+                            join a in _context.Approvers on c.Id equals a.RequestId
+                            where a.RequestType == 3 && a.Status == 0 && c.CreatedAt < twoDaysAgo
+                            select new
+                            {
+                                c.Id,
+                                a.UserId,
+                            };
+                
+                var complaints =  query.ToList();
+
+                foreach (var complaint in complaints)
+                {
+                    var approverP =  _context.Approvers
+                        .FirstOrDefault(x => x.RequestId == complaint.Id && x.UserId == complaint.UserId && x.RequestType == 3);
+
+                    if (approverP != null)
+                    {
+                        approverP.CanViewed = false;
+                        approverP.Note = "Moved";
+                        _context.Update(approverP);
+                        var managerId = GetIdByRole("Manager").FirstOrDefault();
+                        Approver newApprover = new Approver
+                        {
+                            ApproverType = 3,
+                            CanViewed = true,
+                            RequestId = approverP.RequestId,
+                            RequestType = 3,
+                            Status = RequestStatus.Pending,
+                            UserId = managerId
+                        };
+
+                         _context.Approvers.Add(newApprover);
+
+                         _context.SaveChanges();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+
 
         }
         public async Task<bool> SaveChanges()
@@ -245,5 +295,7 @@ namespace GlobalSurveysApp.Data.Repo
             }
             return false;
         }
+
+
     }
 }

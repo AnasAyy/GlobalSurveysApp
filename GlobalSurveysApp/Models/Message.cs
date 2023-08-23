@@ -12,6 +12,8 @@ namespace GlobalSurveysApp.Models
         [Required]
         public string Body { get; set; } = null!;
         [Required]
+        public int type { get; set; }
+        [Required]
         public string ToWhom { get; set; } = null!;
         [ForeignKey("UserId")]
         public int UserId { get; set; }

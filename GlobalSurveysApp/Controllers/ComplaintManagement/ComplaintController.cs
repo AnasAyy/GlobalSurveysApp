@@ -7,6 +7,7 @@ using GlobalSurveysApp.Dtos.ApproveDtos;
 using GlobalSurveysApp.Dtos.ComplaintDtos;
 using GlobalSurveysApp.Dtos.TimeOffDtos;
 using GlobalSurveysApp.Models;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -84,6 +85,8 @@ namespace GlobalSurveysApp.Controllers.ComplaintManagement
 
             if (!_userRepo.SaveChanges())
             {
+                
+
                 return BadRequest(new ErrorDto
                 {
                     Code = 400,
@@ -92,7 +95,13 @@ namespace GlobalSurveysApp.Controllers.ComplaintManagement
                 });
             }
 
+            var recurringJobId = "complaintJobId";
+            var recurringJobOptions = new RecurringJobOptions
+            {
+                TimeZone = TimeZoneInfo.Local
+            };
 
+            RecurringJob.AddOrUpdate(recurringJobId,  () =>  _complaintRepo.Complaint_BS(), Cron.Daily, recurringJobOptions);
 
             FC.MessageAR = "شكوى جديد من " + user?.FirstName + " " + user?.LastName;
             FC.MessageEN = "New Complaint from " + user?.FirstName + " " + user?.LastName;
@@ -353,6 +362,8 @@ namespace GlobalSurveysApp.Controllers.ComplaintManagement
                 return Unauthorized();
             }
             #endregion
+
+
             FCMtokenResponseDto FC = new FCMtokenResponseDto();
 
             var complaint = _complaintRepo.GetComplaintById(request.RequestId);
@@ -404,5 +415,8 @@ namespace GlobalSurveysApp.Controllers.ComplaintManagement
 
 
         }
+
+
+        
     }
 }
