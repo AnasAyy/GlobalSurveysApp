@@ -4,11 +4,9 @@ using GlobalSurveysApp.Dtos.AdvanceDtos;
 using GlobalSurveysApp.Dtos;
 using GlobalSurveysApp.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using GlobalSurveysApp.Dtos.TimeOffDtos;
-using System.Threading;
 using Microsoft.EntityFrameworkCore;
 using GlobalSurveysApp.Dtos.ApproveDtos;
 
@@ -362,7 +360,14 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
         [Authorize(Roles = "Normal user, Direct responsible, HR"), HttpGet("GetSubsituteEmployee")]
         public async Task<IActionResult> GetSubsituteEmployee()
         {
-            var subsituteEmployees = await _timeOffRepo.GetSubsituteEmployee();
+            #region Check Token Data
+            var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            #endregion
+            var subsituteEmployees = await _timeOffRepo.GetSubsituteEmployee(Convert.ToInt32(userId.Value));
             if (subsituteEmployees == null)
             {
                 return Ok(new ErrorDto

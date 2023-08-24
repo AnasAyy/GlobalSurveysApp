@@ -23,7 +23,7 @@ namespace GlobalSurveysApp.Data.Repo
 
         public Task<List<Approver>> GetApproversByRequestId(int id);
 
-        public Task<List<GetSubsituteEmployeeResponseDto>> GetSubsituteEmployee();
+        public Task<List<GetSubsituteEmployeeResponseDto>> GetSubsituteEmployee(int userId);
         public Task<List<Publics>> GetTypes();
 
         public Task<IQueryable<GetTimeOffForApproverResponseDto>> GetTimeOffForApprover(int id);
@@ -149,11 +149,12 @@ namespace GlobalSurveysApp.Data.Repo
             return approvers;
         }
 
-        public async Task<List<GetSubsituteEmployeeResponseDto>> GetSubsituteEmployee()
+        public async Task<List<GetSubsituteEmployeeResponseDto>> GetSubsituteEmployee(int userId)
         {
 
 
             var substitutes = await _context.Users
+            .Where(user => user.Id != userId)
             .Select(user => new GetSubsituteEmployeeResponseDto
             {
                 Id = user.Id,
