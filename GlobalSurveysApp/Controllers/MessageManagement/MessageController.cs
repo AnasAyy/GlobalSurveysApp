@@ -113,8 +113,8 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
         }
 
 
-        [Authorize(Roles ="HR, Manager"), HttpGet("GetMessagesForTeller")]
-        public async Task<IActionResult> GetMessagesForTeller(GetMessagesForTellerRequestDto request)
+        [Authorize(Roles = "HR, Manager"), HttpGet("GetMessagesForTeller")]
+        public async Task<IActionResult> GetMessagesForTeller(GetMessagesRequestDto request)
         {
             #region Check Token Data
             var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
@@ -126,7 +126,7 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
             var result = await _messageRepo.GetMessagesForTeller(Convert.ToInt32(userId.Value));
             if (result.Any())
             {
-                var list = PagedList<GetMessagesForTellerResponseDto>.ToPagedList(result, request.Page, 10);
+                var list = PagedList<GetMessagesResponseDto>.ToPagedList(result, request.Page, 10);
                 Response.Headers.Add("X-Pagination", System.Text.Json.JsonSerializer.Serialize(list.Paganation));
                 return Ok(list);
             }
@@ -159,7 +159,7 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
 
 
             _messageRepo.UpdateMessage(result);
-            if (! await _messageRepo.SaveChanges())
+            if (!await _messageRepo.SaveChanges())
             {
                 return BadRequest(new ErrorDto
                 {
@@ -171,7 +171,71 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
             return Ok();
         }
 
+        [Authorize(Roles = "HR, Manager"), HttpGet("ViewMessagesDetalisforTeller")]
+        public async Task<IActionResult> ViewMessagesDetalisforTeller(GetMessageDetalisRequestDto request)
+        {
+            var result = await _messageRepo.ViewMessagesDetalisforTeller(request.Id);
+            if (result == null)
+            {
+                return Ok(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "لا يوجد بيانات",
+                    MessageEn = "No Data",
+                });
+            }
+            return Ok(result);
+        }
 
+        [Authorize(Roles = "Direct responsible, Normal user HR, Manager"), HttpGet("GetMessagesForReciver")]
+        public async Task<IActionResult> GetMessagesForReciver(GetMessagesRequestDto request)
+        {
+            #region Check Token Data
+            var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            #endregion
+            var result = await _messageRepo.GetMessagesForReciver(Convert.ToInt32(userId.Value));
+            if (result.Any())
+            {
+                var list = PagedList<GetMessagesResponseDto>.ToPagedList(result, request.Page, 10);
+                Response.Headers.Add("X-Pagination", System.Text.Json.JsonSerializer.Serialize(list.Paganation));
+                return Ok(list);
+            }
+            return Ok(new ErrorDto
+            {
+                Code = 400,
+                MessageAr = "لا يوجد بيانات",
+                MessageEn = "No Data",
+            });
+        }
+
+        [Authorize(Roles = "Direct responsible, Normal user HR, Manager"), HttpGet("GetMessagesDetailsForReciver")]
+        public async Task<IActionResult> GetMessagesDetailsForReciver(GetMessageDetalisRequestDto request)
+        {
+            #region Check Token Data
+            var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            #endregion
+
+            var result = await _messageRepo.ViewMessagesDetalisforReciver(Convert.ToInt32(userId.Value), request.Id);
+            if (result == null)
+            {
+                return Ok(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "لا يوجد بيانات",
+                    MessageEn = "No Data",
+                });
+            }
+            return Ok(result);
+
+        }
 
     }
 }

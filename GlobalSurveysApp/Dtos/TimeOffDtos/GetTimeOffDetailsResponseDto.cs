@@ -9,7 +9,8 @@ namespace GlobalSurveysApp.Dtos.TimeOffDtos
         public int Number { get;set; }
         public DateTime From { get; set; }
         public DateTime To { get; set; }
-        public string EmergencyNumber = null!;
+
+        public string EmergencyNumber { get; set; } = null!;
         public int SubsituteEmployeeId { get; set; }
         public RequestStatus? DirectResponsibleStatus { get; set; } = null;
         public RequestStatus? HRStatus { get; set; } = null;

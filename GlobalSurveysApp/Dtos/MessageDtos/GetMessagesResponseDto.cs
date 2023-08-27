@@ -1,6 +1,6 @@
 ﻿namespace GlobalSurveysApp.Dtos.MessageDtos
 {
-    public class GetMessagesForTellerResponseDto
+    public class GetMessagesResponseDto
     {
         public int Id { get; set; }
         public string Title { get; set; } = null!;

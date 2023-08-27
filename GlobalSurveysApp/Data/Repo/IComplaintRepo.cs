@@ -86,7 +86,6 @@ namespace GlobalSurveysApp.Data.Repo
         {
             var query = from complaint in _context.Complaints
                         where complaint.UserId == id
-                        orderby complaint.CreatedAt descending
                         select new GetAllComplaintResponseDto
                         {
                             Id = complaint.Id,

@@ -2,9 +2,9 @@
 
 namespace GlobalSurveysApp.Dtos.MessageDtos
 {
-    public class GetMessagesForTellerRequestDto
+    public class GetMessageDetalisRequestDto
     {
         [RegularExpression(@"^\d+$", ErrorMessage = "Invalid input")]
-        public int Page { get; set; }
+        public int Id { get; set; }
     }
 }

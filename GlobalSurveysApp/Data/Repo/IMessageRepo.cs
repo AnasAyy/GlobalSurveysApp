@@ -13,9 +13,12 @@ namespace GlobalSurveysApp.Data.Repo
         public Task CreateMessage(Message message);
 
         public Task<List<Publics>> GetMessageType();
-        public Task<IQueryable<GetMessagesForTellerResponseDto>> GetMessagesForTeller(int userId);
+        public Task<IQueryable<GetMessagesResponseDto>> GetMessagesForTeller(int userId);
         public Message? GetMessageById(int id);
         public void UpdateMessage(Message message);
+        public Task<GetMessageDetalisResponceDtos> ViewMessagesDetalisforTeller(int id);
+        public Task<IQueryable<GetMessagesResponseDto>> GetMessagesForReciver(int userId);
+        public Task<GetMessageDetalisForReciverResponceDtos> ViewMessagesDetalisforReciver(int userId, int messagId);
         public Task<bool> SaveChanges();
 
 
@@ -90,14 +93,14 @@ namespace GlobalSurveysApp.Data.Repo
             await _context.Messages.AddAsync(message);
         }
 
-        public async Task<IQueryable<GetMessagesForTellerResponseDto>> GetMessagesForTeller(int userId)
+        public async Task<IQueryable<GetMessagesResponseDto>> GetMessagesForTeller(int userId)
         {
             var query = from m in _context.Messages
                         join p in _context.PublicLists on m.Type equals p.Id
                         where m.UserId == userId
-                        select new GetMessagesForTellerResponseDto
+                        select new GetMessagesResponseDto
                         {
-                            Id= m.Id,
+                            Id = m.Id,
                             Title = m.Title,
                             Date = m.CreatedAt,
                             TypeAR = p.NameAR,
@@ -116,6 +119,137 @@ namespace GlobalSurveysApp.Data.Repo
         public void UpdateMessage(Message message)
         {
             _context.Messages.Update(message);
+        }
+
+        public async Task<GetMessageDetalisResponceDtos> ViewMessagesDetalisforTeller(int id)
+        {
+            var message = await _context.Messages.SingleOrDefaultAsync(x => x.Id == id);
+            if (message != null)
+            {
+                string ToWhomeEN = "To All";
+                string ToWhomeAR = "الى الجميع";
+                if (message.Type == 1037)
+                {
+                    var dep = await _context.PublicLists.SingleOrDefaultAsync(y => y.Id == message.ToWhom);
+                    if (dep != null)
+                    {
+                        ToWhomeAR = dep.NameAR;
+                        ToWhomeEN = dep.NameEN;
+                    }
+
+                }
+                if (message.Type == 1038)
+                {
+                    var user = await _context.Users.SingleOrDefaultAsync(y => y.Id == message.ToWhom);
+                    if (user != null)
+                    {
+                        ToWhomeAR = user.FirstName + " " + user.LastName;
+                        ToWhomeEN = user.FirstName + " " + user.LastName;
+                    }
+
+                }
+
+                return new GetMessageDetalisResponceDtos
+                {
+                    Title = message.Title,
+                    Body = message.Body,
+                    Date = message.CreatedAt,
+                    Type = message.Type,
+                    ToWhomAR = ToWhomeAR,
+                    ToWhomEN = ToWhomeEN,
+                };
+            }
+            return null!;
+        }
+
+        public async Task<IQueryable<GetMessagesResponseDto>> GetMessagesForReciver(int userId)
+        {
+            var query = from message in _context.Messages
+                        join publicList in _context.PublicLists on message.Type equals publicList.Id
+
+                        where message.Type == 1036 ||
+                              (message.Type == 1038 && message.ToWhom == userId)
+
+                        select new GetMessagesResponseDto
+                        {
+                            Id = message.Id,
+                            Title = message.Title,
+                            Date = message.CreatedAt,
+                            TypeAR = publicList.NameAR,
+                            TypeEN = publicList.NameEN
+                        };
+            var query1 = from message in _context.Messages
+                         join publicList in _context.PublicLists on message.Type equals publicList.Id
+                         join user in _context.Users on message.ToWhom equals user.Department
+                         where message.Type == 1037
+
+                         select new GetMessagesResponseDto
+                         {
+                             Id = message.Id,
+                             Title = message.Title,
+                             Date = message.CreatedAt,
+                             TypeAR = publicList.NameAR,
+                             TypeEN = publicList.NameEN
+                         };
+            var combinedQuery = query.Union(query1);
+            return await Task.FromResult(combinedQuery);
+        }
+
+        public async Task<GetMessageDetalisForReciverResponceDtos> ViewMessagesDetalisforReciver(int userId, int messagId)
+        {
+            
+            var message = await _context.Messages.SingleOrDefaultAsync(x => x.Id == messagId);
+            if (message != null)
+            {
+                string ToWhomeEN = "To All";
+                string ToWhomeAR = "الى الجميع";
+                if (message.Type == 1037)
+                {
+                    var dep = await _context.PublicLists.SingleOrDefaultAsync(y => y.Id == message.ToWhom);
+                    if (dep != null)
+                    {
+                        ToWhomeAR = dep.NameAR;
+                        ToWhomeEN = dep.NameEN;
+                    }
+
+                }
+                if (message.Type == 1038)
+                {
+                    var user = await _context.Users.SingleOrDefaultAsync(y => y.Id == message.ToWhom);
+                    if (user != null)
+                    {
+                        ToWhomeAR = user.FirstName + " " + user.LastName;
+                        ToWhomeEN = user.FirstName + " " + user.LastName;
+                    }
+
+                }
+                var roleId = await _context.Users
+            .Where(x => x.Id == message.UserId)
+            .Select(x => x.RoleId)
+            .SingleOrDefaultAsync();
+
+                var userRole = await _context.Roles
+                .Where(x => x.Id == roleId)
+                .Select(x => x.Title)
+                .SingleOrDefaultAsync();
+                if (userRole == null)
+                {
+                    return null!;
+                }
+                return new GetMessageDetalisForReciverResponceDtos
+                {
+                    Title = message.Title,
+                    Body = message.Body,
+                    From = userRole,
+                    Date = message.CreatedAt,
+                    Type = message.Type,
+                    ToWhomAR = ToWhomeAR,
+                    ToWhomEN = ToWhomeEN,
+                };
+            }
+            return null!;
+
+
         }
     }
 }

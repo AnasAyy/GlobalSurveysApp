@@ -250,7 +250,7 @@ namespace GlobalSurveysApp.Controllers.ComplaintManagement
 
         }
 
-        [HttpGet("GetTitle")]
+        [Authorize(Roles = "Normal user, Direct responsible"), HttpGet("GetTitle")]
         public async Task<IActionResult> GetTitle()
         {
             var types = await _complaintRepo.GetTitles();
