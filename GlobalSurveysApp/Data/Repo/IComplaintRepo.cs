@@ -86,6 +86,7 @@ namespace GlobalSurveysApp.Data.Repo
         {
             var query = from complaint in _context.Complaints
                         where complaint.UserId == id
+                        orderby complaint.Id descending
                         select new GetAllComplaintResponseDto
                         {
                             Id = complaint.Id,
@@ -102,7 +103,7 @@ namespace GlobalSurveysApp.Data.Repo
         {
             var query = from complaint in _context.Complaints
                         where complaint.UserId == id && complaint.CreatedAt >= From && complaint.CreatedAt <= to
-                        orderby complaint.CreatedAt descending
+                        orderby complaint.Id descending
                         select new GetAllComplaintResponseDto
                         {
                             Id = complaint.Id,
@@ -162,6 +163,7 @@ namespace GlobalSurveysApp.Data.Repo
                         where ap.UserId == id
                         where ap.RequestType == 3
                         where ap.CanViewed == true
+                        orderby c.Id descending
                         select new GetComplaintForApproverResponseDto
                         {
                             Id = c.Id,
@@ -184,6 +186,7 @@ namespace GlobalSurveysApp.Data.Repo
                         where ap.UserId == id && (u.FirstName + " " + u.SecondName + " " + u.ThirdName + " " + u.LastName).Contains(name)
                         where ap.RequestType == 3
                         where ap.CanViewed == true
+                        orderby c.Id descending
                         select new GetComplaintForApproverResponseDto
                         {
                             Id = c.Id,
@@ -205,6 +208,7 @@ namespace GlobalSurveysApp.Data.Repo
                         where ap.UserId == id && c.CreatedAt >= From && c.CreatedAt <= to
                         where ap.RequestType == 3
                         where ap.CanViewed == true
+                        orderby c.Id descending
                         select new GetComplaintForApproverResponseDto
                         {
                             Id = c.Id,
@@ -234,29 +238,34 @@ namespace GlobalSurveysApp.Data.Repo
 
             try
             {
-                var twoDaysAgo = DateTime.Now.AddDays(-2);
-
-                var query = from c in _context.Complaints
-                            join a in _context.Approvers on c.Id equals a.RequestId
-                            where a.RequestType == 3 && a.Status == 0 && c.CreatedAt < twoDaysAgo
-                            select new
-                            {
-                                c.Id,
-                                a.UserId,
-                            };
                 
-                var complaints =  query.ToList();
 
-                foreach (var complaint in complaints)
-                {
-                    var approverP =  _context.Approvers
-                        .FirstOrDefault(x => x.RequestId == complaint.Id && x.UserId == complaint.UserId && x.RequestType == 3);
 
-                    if (approverP != null)
+                    var twoDaysAgo = DateTime.Now.AddDays(-2);
+
+                    var query = from c in _context.Complaints
+                                join a in _context.Approvers on c.Id equals a.RequestId
+                                where a.RequestType == 3 && a.Status == 0 && c.CreatedAt < twoDaysAgo && a.ApproverType == 2
+                                select new
+                                {
+                                    c.Id,
+                                    a.UserId,
+                                };
+
+                    var complaints =  query.ToList();
+
+                    foreach (var complaint in complaints)
                     {
-                        approverP.CanViewed = false;
-                        approverP.Note = "Moved";
-                        _context.Update(approverP);
+                        var approverP =  _context.Approvers
+                            .FirstOrDefault(x => x.RequestId == complaint.Id && x.UserId == complaint.UserId && x.RequestType == 3);
+
+                        if (approverP != null)
+                        {
+                            approverP.CanViewed = false;
+                            approverP.Status = RequestStatus.Rejected;
+                            approverP.Note = "Moved";
+                            _context.Approvers.Update(approverP);
+
                         var managerId = GetIdByRole("Manager").FirstOrDefault();
                         Approver newApprover = new Approver
                         {
@@ -268,11 +277,12 @@ namespace GlobalSurveysApp.Data.Repo
                             UserId = managerId
                         };
 
-                         _context.Approvers.Add(newApprover);
+                        _context.Approvers.Add(newApprover);
 
-                         _context.SaveChanges();
                     }
                 }
+                _context.SaveChanges();
+
             }
             catch (Exception ex)
             {

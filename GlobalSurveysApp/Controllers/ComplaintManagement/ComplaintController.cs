@@ -210,7 +210,7 @@ namespace GlobalSurveysApp.Controllers.ComplaintManagement
 
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible"), HttpGet("ViewDetails")]
+        [Authorize(Roles = "Normal user, Direct responsible, Manager, HR"), HttpGet("ViewDetails")]
         public async Task<IActionResult> ViewDetails(ViewDetailsRequestDto request)
         {
             var result = _complaintRepo.GetComplaintById(request.Id);
@@ -295,7 +295,6 @@ namespace GlobalSurveysApp.Controllers.ComplaintManagement
         }
 
 
-
         [Authorize(Roles = "Manager, HR"), HttpGet("GetComplaintForApproverByDate")]
         public async Task<IActionResult> GetComplaintForApproverByDate(GetComplaintForApproverByDAteRequestDto request)
         {
@@ -323,7 +322,7 @@ namespace GlobalSurveysApp.Controllers.ComplaintManagement
             });
         }
 
-        [Authorize(Roles = "Manager, Direct responsible, HR"), HttpGet("GetComplaintForApproverByName")]
+        [Authorize(Roles = "Manager, HR"), HttpGet("GetComplaintForApproverByName")]
         public async Task<IActionResult> GetComplaintForApproverByName(GetComplaintForApproverByNameDto request)
         {
             #region Check Token Data
