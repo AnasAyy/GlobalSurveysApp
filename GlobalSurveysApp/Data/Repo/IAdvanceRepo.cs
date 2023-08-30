@@ -57,7 +57,7 @@ namespace GlobalSurveysApp.Data.Repo
         {
             var query = from advance in _context.Advances
                         where advance.UserId == id && advance.CreateAt >= From && advance.CreateAt <= to
-                        orderby advance.CreateAt descending
+                        orderby advance.Id descending
                         select new GetAllAdvanceResponseDto
                         {
                             Id = advance.Id,
@@ -74,7 +74,7 @@ namespace GlobalSurveysApp.Data.Repo
         {
             var query = from advance in _context.Advances
                         where advance.UserId == id
-                        orderby advance.CreateAt descending
+                        orderby advance.Id descending
                         select new GetAllAdvanceResponseDto
                         {
                             Id = advance.Id,

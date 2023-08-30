@@ -94,7 +94,7 @@ namespace GlobalSurveysApp.Data.Repo
         {
             var query = from timeOff in _context.TimeOffs
                         where timeOff.UserId == id
-                        orderby timeOff.CreatedAt descending
+                        orderby timeOff.Id descending
                         select new GetAllTimeOffResponseDto
                         {
                             Id = timeOff.Id,
@@ -113,7 +113,7 @@ namespace GlobalSurveysApp.Data.Repo
         {
             var query = from timeOff in _context.TimeOffs
                         where timeOff.UserId == id && timeOff.CreatedAt >= From && timeOff.CreatedAt <= to
-                        orderby timeOff.CreatedAt descending
+                        orderby timeOff.Id descending
                         select new GetAllTimeOffResponseDto
                         {
                             Id = timeOff.Id,

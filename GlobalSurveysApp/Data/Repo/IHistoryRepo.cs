@@ -9,6 +9,7 @@ namespace GlobalSurveysApp.Data.Repo
         public Task<IQueryable<GetListOfUsersResponseDto>> GetListOfUsers();
         public Task<IQueryable<GetListOfUsersResponseDto>> GetListOfUsersByName(string name);
         public Task<TotalHistoryResponseDto> GetTotal(int userId);
+        public Task<TotalHistoryResponseDto> GetTotalByDate(int userId, DateTime From, DateTime To);
 
     }
 
@@ -63,6 +64,20 @@ namespace GlobalSurveysApp.Data.Repo
                 TimeOff = timeOff,
                 Complaint = complaint
             };
+        }
+
+        public async Task<TotalHistoryResponseDto> GetTotalByDate(int userId, DateTime From, DateTime To)
+        {
+            var advance = await _context.Advances.CountAsync(a => a.UserId == userId && a.CreateAt >= From && a.CreateAt <= To);
+            var timeOff = await _context.TimeOffs.CountAsync(t => t.UserId == userId && t.CreatedAt >= From && t.CreatedAt <= To);
+            var complaint = await _context.Complaints.CountAsync(c => c.UserId == userId && c.CreatedAt >= From && c.CreatedAt <= To);
+            return new TotalHistoryResponseDto
+            {
+                Advance = advance,
+                TimeOff = timeOff,
+                Complaint = complaint
+            };
+           
         }
     }
 }
