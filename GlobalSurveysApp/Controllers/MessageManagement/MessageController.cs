@@ -22,7 +22,7 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
             _mapper = mapper;
         }
 
-        [Authorize(Roles = "HR, Manager"), HttpGet("GetDepartments")]
+        [Authorize(Roles = "Direct responsible, Normal user, HR, Manager"), HttpGet("GetDepartments")]
         public async Task<IActionResult> GetDepartments()
         {
             var types = await _messageRepo.GeTDepartments();
@@ -39,7 +39,7 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
             return Ok(types);
         }
 
-        [Authorize(Roles = "HR, Manager"), HttpGet("GetUsers")]
+        [Authorize(Roles = "Direct responsible, Normal user, HR, Manager"), HttpGet("GetUsers")]
         public async Task<IActionResult> GetUsers()
         {
             #region Check Token Data
@@ -64,7 +64,7 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
             return Ok(users);
         }
 
-        [Authorize(Roles = "HR, Manager"), HttpGet("GetMessageType")]
+        [Authorize(Roles = "Direct responsible, Normal user, HR, Manager"), HttpGet("GetMessageType")]
         public async Task<IActionResult> GetMessageType()
         {
             var types = await _messageRepo.GetMessageType();
@@ -187,7 +187,7 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
             return Ok(result);
         }
 
-        [Authorize(Roles = "Direct responsible, Normal user HR, Manager"), HttpGet("GetMessagesForReciver")]
+        [Authorize(Roles = "Direct responsible, Normal user, HR, Manager"), HttpGet("GetMessagesForReciver")]
         public async Task<IActionResult> GetMessagesForReciver(GetMessagesRequestDto request)
         {
             #region Check Token Data
@@ -212,7 +212,7 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
             });
         }
 
-        [Authorize(Roles = "Direct responsible, Normal user HR, Manager"), HttpGet("GetMessagesDetailsForReciver")]
+        [Authorize(Roles = "Direct responsible, Normal user, HR, Manager"), HttpGet("GetMessagesDetailsForReciver")]
         public async Task<IActionResult> GetMessagesDetailsForReciver(GetMessageDetalisRequestDto request)
         {
             #region Check Token Data

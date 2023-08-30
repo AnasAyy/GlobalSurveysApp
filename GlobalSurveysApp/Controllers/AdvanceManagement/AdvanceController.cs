@@ -267,7 +267,7 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
 
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible, HR"), HttpGet("ViewDetails")]
+        [Authorize(Roles = "Normal user, Direct responsible, HR, Manager"), HttpGet("ViewDetails")]
         public async Task<IActionResult> ViewDetails(ViewDetailsRequestDto request)
         {
             var result = _advanceRepo.GetAdvanceById(request.Id);
@@ -354,7 +354,7 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
 
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible, HR"), HttpGet("GetCurrency")]
+        [Authorize(Roles = "Normal user, Direct responsible, HR, Manager"), HttpGet("GetCurrency")]
         public async Task<IActionResult> GetCurrency()
         {
             var Currency = await _advanceRepo.GetCurrency();

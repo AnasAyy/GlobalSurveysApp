@@ -98,6 +98,7 @@ namespace GlobalSurveysApp.Data.Repo
             var query = from m in _context.Messages
                         join p in _context.PublicLists on m.Type equals p.Id
                         where m.UserId == userId
+                        orderby m.Id descending
                         select new GetMessagesResponseDto
                         {
                             Id = m.Id,
@@ -166,10 +167,9 @@ namespace GlobalSurveysApp.Data.Repo
         {
             var query = from message in _context.Messages
                         join publicList in _context.PublicLists on message.Type equals publicList.Id
-
+                        where message.UserId != userId
                         where message.Type == 1036 ||
-                              (message.Type == 1038 && message.ToWhom == userId)
-
+                              (message.Type == 1038 && message.ToWhom == userId)  
                         select new GetMessagesResponseDto
                         {
                             Id = message.Id,
@@ -182,7 +182,8 @@ namespace GlobalSurveysApp.Data.Repo
                          join publicList in _context.PublicLists on message.Type equals publicList.Id
                          join user in _context.Users on message.ToWhom equals user.Department
                          where message.Type == 1037
-
+                         where message.UserId != userId
+                         where user.Id == userId
                          select new GetMessagesResponseDto
                          {
                              Id = message.Id,
@@ -191,7 +192,7 @@ namespace GlobalSurveysApp.Data.Repo
                              TypeAR = publicList.NameAR,
                              TypeEN = publicList.NameEN
                          };
-            var combinedQuery = query.Union(query1);
+            var combinedQuery = query.Union(query1).OrderByDescending(message => message.Id); ;
             return await Task.FromResult(combinedQuery);
         }
 

@@ -250,7 +250,7 @@ namespace GlobalSurveysApp.Controllers.ComplaintManagement
 
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible"), HttpGet("GetTitle")]
+        [Authorize(Roles = "Normal user, Direct responsible, Manager, HR"), HttpGet("GetTitle")]
         public async Task<IActionResult> GetTitle()
         {
             var types = await _complaintRepo.GetTitles();
@@ -293,7 +293,6 @@ namespace GlobalSurveysApp.Controllers.ComplaintManagement
                 MessageEn = "No Data",
             });
         }
-
 
         [Authorize(Roles = "Manager, HR"), HttpGet("GetComplaintForApproverByDate")]
         public async Task<IActionResult> GetComplaintForApproverByDate(GetComplaintForApproverByDAteRequestDto request)
