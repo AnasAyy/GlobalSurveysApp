@@ -14,6 +14,7 @@ namespace GlobalSurveysApp.Data.Repo
         public bool IsVerified(int id);
         public void CreateFCM(FCMtoken fCMtoken);
         public void DeleteFCM(int Id);
+        public string? GetDep(int depId); 
         
         
     }
@@ -98,6 +99,11 @@ namespace GlobalSurveysApp.Data.Repo
                 _context.FCMtokens.RemoveRange(tokenToDelete);
             }
             
+        }
+
+        public string? GetDep(int depId)
+        {
+            return _context.PublicLists.SingleOrDefault(x => x.Id == depId)?.NameEN;
         }
     }
 }

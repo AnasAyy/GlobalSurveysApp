@@ -13,6 +13,8 @@ namespace GlobalSurveysApp.Data.Repo
         public  Task<User?> GetUserByIdAsync(int id);
         
         public IQueryable<GetAllUSersResponseDto> GetUserByName(string name);
+        public IQueryable<GetAllUSersResponseDto> GetUserByNameActive(string name);
+        public IQueryable<GetAllUSersResponseDto> GetUserByNameDis_Active(string name);
         public IQueryable<GetAllUSersResponseDto> GetUserByType(bool type);
         public IQueryable<GetAllUSersResponseDto> GetAllUsers();
         public bool IsExits(string privateMobalie);
@@ -42,6 +44,7 @@ namespace GlobalSurveysApp.Data.Repo
         public IQueryable<GetAllUSersResponseDto> GetAllUsers()
         {
             return from u in _context.Users
+                   orderby u.Id descending
                    select new GetAllUSersResponseDto
                    {
                        Id = u.Id,
@@ -203,6 +206,34 @@ namespace GlobalSurveysApp.Data.Repo
         public async Task<List<Role>> GetRole()
         {
             return await _context.Roles.ToListAsync();
+        }
+
+        public IQueryable<GetAllUSersResponseDto> GetUserByNameActive(string name)
+        {
+            return from u in _context.Users
+                   where (u.FirstName + " " + u.SecondName + " " + u.ThirdName + " " + u.LastName).Contains(name)
+                   where u.IsActive == true
+                   select new GetAllUSersResponseDto
+                   {
+                       Id = u.Id,
+                       Name = u.FirstName + " " + u.LastName,
+                       PhoneNumber = u.PrivateMobile,
+                       IsActive = u.IsActive,
+                   };
+        }
+
+        public IQueryable<GetAllUSersResponseDto> GetUserByNameDis_Active(string name)
+        {
+            return from u in _context.Users
+                   where (u.FirstName + " " + u.SecondName + " " + u.ThirdName + " " + u.LastName).Contains(name)
+                   where u.IsActive == false
+                   select new GetAllUSersResponseDto
+                   {
+                       Id = u.Id,
+                       Name = u.FirstName + " " + u.LastName,
+                       PhoneNumber = u.PrivateMobile,
+                       IsActive = u.IsActive,
+                   };
         }
     }
 

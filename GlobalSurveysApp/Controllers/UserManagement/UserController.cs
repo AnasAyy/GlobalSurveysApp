@@ -136,6 +136,44 @@ namespace GlobalSurveysApp.Controllers.UserManagement
         }
 
 
+        [Authorize(Roles = "Admin, Manager"), HttpGet("GetUserByNameActive")]
+        public IActionResult GetUserByNameActive(GetUserByNameRequestDto request)
+        {
+            var result = _userRepo.GetUserByNameActive(request.Name);
+            if (result != null)
+            {
+                var list = PagedList<GetAllUSersResponseDto>.ToPagedList(result, request.Page, 10);
+                Response.Headers.Add("X-Pagination", System.Text.Json.JsonSerializer.Serialize(list.Paganation));
+                return Ok(list);
+            }
+            return Ok(new ErrorDto
+            {
+                Code = 400,
+                MessageAr = "لا يوجد بيانات",
+                MessageEn = "No Data",
+            });
+        }
+
+
+        [Authorize(Roles = "Admin, Manager"), HttpGet("GetUserByNameDis_Active")]
+        public IActionResult GetUserByNameDis_Active(GetUserByNameRequestDto request)
+        {
+            var result = _userRepo.GetUserByNameDis_Active(request.Name);
+            if (result != null)
+            {
+                var list = PagedList<GetAllUSersResponseDto>.ToPagedList(result, request.Page, 10);
+                Response.Headers.Add("X-Pagination", System.Text.Json.JsonSerializer.Serialize(list.Paganation));
+                return Ok(list);
+            }
+            return Ok(new ErrorDto
+            {
+                Code = 400,
+                MessageAr = "لا يوجد بيانات",
+                MessageEn = "No Data",
+            });
+        }
+
+
         [Authorize(Roles = "Admin, Manager"), HttpGet("GetUserByType")]
         public IActionResult GetUserByType(GetUserByTypeRequestDto request)
         {

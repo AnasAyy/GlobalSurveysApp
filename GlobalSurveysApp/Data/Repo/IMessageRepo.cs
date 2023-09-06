@@ -134,8 +134,8 @@ namespace GlobalSurveysApp.Data.Repo
                     var dep = await _context.PublicLists.SingleOrDefaultAsync(y => y.Id == message.ToWhom);
                     if (dep != null)
                     {
-                        ToWhomeAR = dep.NameAR;
-                        ToWhomeEN = dep.NameEN;
+                        ToWhomeAR =  message.ToWhom.ToString();
+                        ToWhomeEN =  message.ToWhom.ToString();
                     }
 
                 }
@@ -144,8 +144,8 @@ namespace GlobalSurveysApp.Data.Repo
                     var user = await _context.Users.SingleOrDefaultAsync(y => y.Id == message.ToWhom);
                     if (user != null)
                     {
-                        ToWhomeAR = user.FirstName + " " + user.LastName;
-                        ToWhomeEN = user.FirstName + " " + user.LastName;
+                        ToWhomeAR = message.ToWhom.ToString();
+                        ToWhomeEN = message.ToWhom.ToString();
                     }
 
                 }

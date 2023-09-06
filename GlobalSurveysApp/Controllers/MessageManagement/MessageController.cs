@@ -14,12 +14,14 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
     public class MessageController : ControllerBase
     {
         private readonly IMessageRepo _messageRepo;
+        private readonly IAdvanceRepo _advanceRepo;
         private readonly IMapper _mapper;
 
-        public MessageController(IMessageRepo messageRepo, IMapper mapper)
+        public MessageController(IMessageRepo messageRepo, IMapper mapper, IAdvanceRepo advanceRepo)
         {
             _messageRepo = messageRepo;
             _mapper = mapper;
+            _advanceRepo = advanceRepo;
         }
 
         [Authorize(Roles = "Direct responsible, Normal user, HR, Manager"), HttpGet("GetDepartments")]
@@ -99,6 +101,8 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
             message.UserId = Convert.ToInt32(userId.Value);
 
             await _messageRepo.CreateMessage(message);
+            
+            
             if (!await _messageRepo.SaveChanges())
             {
                 return BadRequest(new ErrorDto
@@ -108,7 +112,13 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
                     MessageEn = "Oops, something went wrong. Please try again.",
                 });
             }
+            if(request.Type == 1038)
+            {
+                string fcm = await _advanceRepo.GetFCM(request.ToWhom);
+                return new JsonResult(new { FCM = fcm });
+            }
             return Ok();
+            
 
         }
 

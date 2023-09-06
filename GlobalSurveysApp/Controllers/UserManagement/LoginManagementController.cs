@@ -73,7 +73,11 @@ namespace GlobalSurveysApp.Controllers.UserManagement
 
             #region Get User Role
             string role = _role.GetRoleById(user.RoleId);
+            #endregion
 
+             #region Get User Department
+            string ?department = _userRepo.GetDep(user.Department);
+            
             #endregion
 
             #region Last Login
@@ -126,11 +130,12 @@ namespace GlobalSurveysApp.Controllers.UserManagement
                     PhoneNumber = user.WorkMobile,
                     UserRole = role,
                     IsVerified = user.IsVerified,
+                    Department = department!
                 }
 
 
 
-            });
+            }) ;
             #endregion
         }
 
@@ -167,6 +172,11 @@ namespace GlobalSurveysApp.Controllers.UserManagement
 
             #region Get User Role
             string role = _role.GetRoleById(user.RoleId);
+
+            #endregion
+
+            #region Get User Department
+            string? department = _userRepo.GetDep(user.Department);
 
             #endregion
 
@@ -211,6 +221,7 @@ namespace GlobalSurveysApp.Controllers.UserManagement
                     PhoneNumber = user.WorkMobile,
                     UserRole = role,
                     IsVerified = user.IsVerified,
+                    Department = department!
                 }
             });
             #endregion
