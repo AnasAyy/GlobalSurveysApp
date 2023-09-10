@@ -43,6 +43,15 @@ namespace GlobalSurveysApp.Controllers.UserManagement
                 MessageEn = "Private Mobail is exits",
             });
 
+            var e = _userRepo.EmailIsExits(request.Email);
+            if (e) return BadRequest(new ErrorDto
+            {
+                Code = 400,
+                MessageAr = "الايميل موجود مسبقا",
+                MessageEn = "Email is exits",
+            });
+
+
             #region Check Photo
             if (request.IdCard == null || request.IdCard.Length == 0)
             {
@@ -214,6 +223,17 @@ namespace GlobalSurveysApp.Controllers.UserManagement
                         Code = 400,
                         MessageAr = "رقم الهاتف موجود مسبقا",
                         MessageEn = "Private Mobail is exits",
+                    });
+            }
+            
+            if (result.Email != request.Email)
+            {
+                if (_userRepo.EmailIsExits(request.Email))
+                    return BadRequest(new ErrorDto
+                    {
+                        Code = 400,
+                        MessageAr = "الايميل موجود مسبقا",
+                        MessageEn = "Email is exits",
                     });
             }
 

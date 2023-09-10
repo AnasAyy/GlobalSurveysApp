@@ -18,6 +18,7 @@ namespace GlobalSurveysApp.Data.Repo
         public IQueryable<GetAllUSersResponseDto> GetUserByType(bool type);
         public IQueryable<GetAllUSersResponseDto> GetAllUsers();
         public bool IsExits(string privateMobalie);
+        public bool EmailIsExits(string email);
         public IQueryable<ViewUserResponceDto> GetUserDetails(int id);
         public GetPublicListResponceDto GetPublicList();
         public Task<List<Role>> GetRole();
@@ -162,6 +163,11 @@ namespace GlobalSurveysApp.Data.Repo
         public bool IsExits(string privateMobalie)
         {
             return _context.Users.Any(x => x.PrivateMobile == privateMobalie);
+        }
+        
+        public bool EmailIsExits(string email)
+        {
+            return _context.Users.Any(x => x.Email == email);
         }
 
         public bool SaveChanges()
