@@ -249,7 +249,7 @@ namespace GlobalSurveysApp.Controllers.ComplaintManagement
             });
 
         }
-         
+        
         [Authorize(Roles = "Normal user, Direct responsible, Manager, HR"), HttpGet("GetTitle")]
         public async Task<IActionResult> GetTitle()
         {
