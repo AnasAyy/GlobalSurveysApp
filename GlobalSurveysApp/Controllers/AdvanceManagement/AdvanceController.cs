@@ -323,7 +323,7 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
                         details.HRStatus = approvers[i].Status;
                         if (approvers[i].Note != null && approvers[i].Note != "")
                         {
-                            details.StatusNote = "HR Note: " + approvers[i].Note;
+                            details.StatusNote += " HR Note: " + approvers[i].Note;
                         }
                     }
                 }
@@ -339,11 +339,11 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
                         details.ManagerStatus = approvers[i].Status;
                         if (approvers[i].Note != null && approvers[i].Note != "")
                         {
-                            details.StatusNote = "Manager Note: " + approvers[i].Note;
+                            details.StatusNote += " Manager Note: " + approvers[i].Note;
+
                         }
                     }
                 }
-
             }
 
             return new JsonResult(new

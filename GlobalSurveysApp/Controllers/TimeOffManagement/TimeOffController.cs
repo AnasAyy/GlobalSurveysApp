@@ -326,7 +326,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
                         details.HRStatus = approvers[i].Status;
                         if (approvers[i].Note != null && approvers[i].Note != "")
                         {
-                            details.StatusNote = "HR Note: " + approvers[i].Note;
+                            details.StatusNote += " HR Note: " + approvers[i].Note;
                         }
                     }
                 }
@@ -342,7 +342,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
                         details.ManagerStatus = approvers[i].Status;
                         if (approvers[i].Note != null && approvers[i].Note != "")
                         {
-                            details.StatusNote = "Manager Note: " + approvers[i].Note;
+                            details.StatusNote += " Manager Note: " + approvers[i].Note;
                         }
                     }
                 }
@@ -612,6 +612,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
                     result.Status = RequestStatus.Rejected;
                     result.Note = request.Note;
                     result.UpdatedAt = DateTime.Now;
+                    result.CanViewed = false;
                     await _timeOffRepo.UpdateApprover(result);
                     var requestUser = _timeOffRepo.GetTimeOffById(result.RequestId);
                     if (requestUser == null)
