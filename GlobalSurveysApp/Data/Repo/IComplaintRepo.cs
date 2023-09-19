@@ -264,6 +264,7 @@ namespace GlobalSurveysApp.Data.Repo
                             approverP.CanViewed = false;
                             approverP.Status = RequestStatus.Rejected;
                             approverP.Note = "Moved";
+                            approverP.UpdatedAt = DateTime.Now;
                             _context.Approvers.Update(approverP);
 
                         var managerId = GetIdByRole("Manager").FirstOrDefault();

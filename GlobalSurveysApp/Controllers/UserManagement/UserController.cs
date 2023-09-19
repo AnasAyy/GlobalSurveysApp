@@ -36,19 +36,23 @@ namespace GlobalSurveysApp.Controllers.UserManagement
         public async Task<IActionResult> AddUser([FromForm] AddUserRequestDto request)
         {
             var u = _userRepo.IsExits(request.PrivateMobile);
-            if (u) return BadRequest(new ErrorDto
+            if (u) return new JsonResult(new
             {
-                Code = 400,
-                MessageAr = "رقم الهاتف موجود مسبقا",
-                MessageEn = "Private Mobail is exits",
+                errors = new
+                {
+
+                    Phone = new[] { "Private Mobail is exits" }
+                }
             });
 
             var e = _userRepo.EmailIsExits(request.Email);
-            if (e) return BadRequest(new ErrorDto
+            if (e) return new JsonResult(new
             {
-                Code = 400,
-                MessageAr = "الايميل موجود مسبقا",
-                MessageEn = "Email is exits",
+                errors = new
+                {
+
+                    Email = new[] { "Email is exits" },
+                }
             });
 
 
@@ -208,32 +212,39 @@ namespace GlobalSurveysApp.Controllers.UserManagement
             var result = _userRepo.GetUserById(request.Id);
             if (result == null)
             {
-                return BadRequest(new ErrorDto
+                return new JsonResult(new
                 {
-                    Code = 400,
-                    MessageAr = "لم يتم التعرف على ال ID",
-                    MessageEn = "Can not recognize ID",
+                    errors = new
+                    {
+                        
+                        Id = new[] { "Can not recognize ID" }
+                    }
                 });
             }
             if (result.PrivateMobile != request.PrivateMobile)
             {
                 if (_userRepo.IsExits(request.PrivateMobile))
-                    return BadRequest(new ErrorDto
+                    return new JsonResult(new
                     {
-                        Code = 400,
-                        MessageAr = "رقم الهاتف موجود مسبقا",
-                        MessageEn = "Private Mobail is exits",
+                        errors = new
+                        {
+
+                           
+                            Phone = new[] { "Private Mobail is exits" }
+                        }
                     });
             }
-            
+
             if (result.Email != request.Email)
             {
                 if (_userRepo.EmailIsExits(request.Email))
-                    return BadRequest(new ErrorDto
+                    return new JsonResult(new
                     {
-                        Code = 400,
-                        MessageAr = "الايميل موجود مسبقا",
-                        MessageEn = "Email is exits",
+                        errors = new
+                        {
+
+                            Email = new[] { "Email is exits" },
+                        }
                     });
             }
 
@@ -254,12 +265,12 @@ namespace GlobalSurveysApp.Controllers.UserManagement
 
             }
             result.UpdatedAt = DateTime.Now;
-            if(request.QRcode != null)
+            if (request.QRcode != null)
             {
                 var QRcode = _encrypt.EncryptPassword(request.QRcode);
                 result.QRcode = QRcode;
             }
-            
+
             result.placeOfBirth = request.PlaceOfBirth;
             result.DateOfBirth = request.DateOfBirth;
             result.Department = request.Department;
