@@ -624,7 +624,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
                     FC.MessageAR = "تم رفض طلب الاجازة الخاص بك ";
                     FC.MessageEN = "Your Time Off request has been rejected ";
                     FC.FCMToken = await _timeOffRepo.GetFCM(Convert.ToInt32(requestUser.UserId));
-                }
+                } 
                 timeOff.IsUpdated = true;
             }
             _timeOffRepo.UpdateTimeOff(timeOff);
