@@ -6,7 +6,7 @@ namespace GlobalSurveysApp.Dtos.TimeOffDtos
     {
         public int Id { get; set; }
         public int Type { get; set; }
-        public int Number { get;set; }
+        public int Number { get; set; } 
         public DateTime From { get; set; }
         public DateTime To { get; set; }
 

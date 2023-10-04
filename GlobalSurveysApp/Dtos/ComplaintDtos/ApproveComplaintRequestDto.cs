@@ -6,6 +6,7 @@ namespace GlobalSurveysApp.Dtos.ComplaintDtos
     {
         [RegularExpression(@"^\d+$", ErrorMessage = "Invalid input")]
         public int RequestId { get; set; }
+        [Required]
         public string Note { get; set; } = null!;
     }
 }

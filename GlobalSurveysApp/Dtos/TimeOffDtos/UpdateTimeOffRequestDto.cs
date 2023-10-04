@@ -15,8 +15,7 @@ namespace GlobalSurveysApp.Dtos.TimeOffDtos
 
         public DateTime To { get; set; }
 
-        [RegularExpression(@"^\d+$", ErrorMessage = "Invalid input")]
-        public int Number { get; set; }
+        public int Number { get; set; } 
 
         public string EmergencyNumber { get; set; } = null!;
 
