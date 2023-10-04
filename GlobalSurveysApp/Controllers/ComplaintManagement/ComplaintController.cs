@@ -32,7 +32,7 @@ namespace GlobalSurveysApp.Controllers.ComplaintManagement
 
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible"), HttpPost("AddComplaint")]
+        [Authorize(Roles = "Normal user, Direct responsible, Secretary"), HttpPost("AddComplaint")]
         public async Task<IActionResult> AddComplaint(AddComplaintRequestDto request)
         {
             #region Check Token Data
@@ -114,7 +114,7 @@ namespace GlobalSurveysApp.Controllers.ComplaintManagement
             #endregion
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible"), HttpGet("ViewUserCopmalint")]
+        [Authorize(Roles = "Normal user, Direct responsible, Secretary"), HttpGet("ViewUserCopmalint")]
         public async Task<IActionResult> ViewUserCopmalint(GetUserComplaintRequestDto request)
         {
             #region Check Token Data
@@ -139,7 +139,7 @@ namespace GlobalSurveysApp.Controllers.ComplaintManagement
             });
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible"), HttpGet("FilterByDate")]
+        [Authorize(Roles = "Normal user, Direct responsible, Secretary"), HttpGet("FilterByDate")]
         public async Task<IActionResult> FilterByDate(GetUserComplaintByDateRequestDto request)
         {
             #region Check Token Data
@@ -165,7 +165,7 @@ namespace GlobalSurveysApp.Controllers.ComplaintManagement
             }); ;
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible"), HttpPut("UpdateComplaint")]
+        [Authorize(Roles = "Normal user, Direct responsible, Secretary"), HttpPut("UpdateComplaint")]
         public IActionResult UpdateComplaint(UpdateComplaintRequestDto request)
         {
             var result = _complaintRepo.GetComplaintById(request.Id);
@@ -210,7 +210,7 @@ namespace GlobalSurveysApp.Controllers.ComplaintManagement
 
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible, Manager, HR"), HttpGet("ViewDetails")]
+        [Authorize(Roles = "Normal user, Direct responsible, Manager, HR, Secretary"), HttpGet("ViewDetails")]
         public async Task<IActionResult> ViewDetails(ViewDetailsRequestDto request)
         {
             var result = _complaintRepo.GetComplaintById(request.Id);
@@ -250,7 +250,7 @@ namespace GlobalSurveysApp.Controllers.ComplaintManagement
 
         }
         
-        [Authorize(Roles = "Normal user, Direct responsible, Manager, HR"), HttpGet("GetTitle")]
+        [Authorize(Roles = "Normal user, Direct responsible, Manager, HR, Secretary"), HttpGet("GetTitle")]
         public async Task<IActionResult> GetTitle()
         {
             var types = await _complaintRepo.GetTitles();

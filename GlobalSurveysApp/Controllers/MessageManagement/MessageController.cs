@@ -24,7 +24,7 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
             _advanceRepo = advanceRepo;
         }
 
-        [Authorize(Roles = "Direct responsible, Normal user, HR, Manager"), HttpGet("GetDepartments")]
+        [Authorize(Roles = "Direct responsible, Normal user, HR, Manager, Secretary"), HttpGet("GetDepartments")]
         public async Task<IActionResult> GetDepartments()
         {
             var types = await _messageRepo.GeTDepartments();
@@ -41,7 +41,7 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
             return Ok(types);
         }
 
-        [Authorize(Roles = "Direct responsible, Normal user, HR, Manager"), HttpGet("GetUsers")]
+        [Authorize(Roles = "Direct responsible, Normal user, HR, Manager, Secretary"), HttpGet("GetUsers")]
         public async Task<IActionResult> GetUsers()
         {
             #region Check Token Data
@@ -66,7 +66,7 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
             return Ok(users);
         }
 
-        [Authorize(Roles = "Direct responsible, Normal user, HR, Manager"), HttpGet("GetMessageType")]
+        [Authorize(Roles = "Direct responsible, Normal user, HR, Manager, Secretary"), HttpGet("GetMessageType")]
         public async Task<IActionResult> GetMessageType()
         {
             var types = await _messageRepo.GetMessageType();
@@ -85,7 +85,7 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
 
 
 
-        [Authorize(Roles = "HR, Manager"), HttpPost("CreateMessage")]
+        [Authorize(Roles = "HR, Manager, Secretary"), HttpPost("CreateMessage")]
         public async Task<IActionResult> CreateMessage(AddMessageRequestDto request)
         {
             #region Check Token Data
@@ -123,7 +123,7 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
         }
 
 
-        [Authorize(Roles = "HR, Manager"), HttpGet("GetMessagesForTeller")]
+        [Authorize(Roles = "HR, Manager, Secretary"), HttpGet("GetMessagesForTeller")]
         public async Task<IActionResult> GetMessagesForTeller(GetMessagesRequestDto request)
         {
             #region Check Token Data
@@ -148,7 +148,7 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
             });
         }
 
-        [Authorize(Roles = "HR, Manager"), HttpPut("UpdateMessage")]
+        [Authorize(Roles = "HR, Manager, Secretary"), HttpPut("UpdateMessage")]
         public async Task<IActionResult> UpdateMessage(UpdateMessageRequestDto request)
         {
             var result = _messageRepo.GetMessageById(request.Id);
@@ -181,7 +181,7 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
             return Ok();
         }
 
-        [Authorize(Roles = "HR, Manager"), HttpGet("ViewMessagesDetalisforTeller")]
+        [Authorize(Roles = "HR, Manager, Secretary"), HttpGet("ViewMessagesDetalisforTeller")]
         public async Task<IActionResult> ViewMessagesDetalisforTeller(GetMessageDetalisRequestDto request)
         {
             var result = await _messageRepo.ViewMessagesDetalisforTeller(request.Id);
@@ -197,7 +197,7 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
             return Ok(result);
         }
 
-        [Authorize(Roles = "Direct responsible, Normal user, HR, Manager"), HttpGet("GetMessagesForReciver")]
+        [Authorize(Roles = "Direct responsible, Normal user, HR, Manager, Secretary"), HttpGet("GetMessagesForReciver")]
         public async Task<IActionResult> GetMessagesForReciver(GetMessagesRequestDto request)
         {
             #region Check Token Data
@@ -222,7 +222,7 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
             });
         }
 
-        [Authorize(Roles = "Direct responsible, Normal user, HR, Manager"), HttpGet("GetMessagesDetailsForReciver")]
+        [Authorize(Roles = "Direct responsible, Normal user, HR, Manager, Secretary"), HttpGet("GetMessagesDetailsForReciver")]
         public async Task<IActionResult> GetMessagesDetailsForReciver(GetMessageDetalisRequestDto request)
         {
             #region Check Token Data

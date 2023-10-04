@@ -29,7 +29,7 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
         }
 
 
-        [Authorize(Roles = "Normal user, Direct responsible, HR"), HttpPost("AddAdvance")]
+        [Authorize(Roles = "Normal user, Direct responsible, HR, Secretary"), HttpPost("AddAdvance")]
         public async Task<ActionResult<object>> AddAdvance(AddAdvanceRequestDto request)
         {
             #region Check Token Data
@@ -171,7 +171,7 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
 
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible, HR"), HttpGet("ViewUserAdvance")]
+        [Authorize(Roles = "Normal user, Direct responsible, HR, Secretary"), HttpGet("ViewUserAdvance")]
         public async Task<IActionResult> ViewUserAdvance(GetUserAdvanceRequestDto request)
         {
             #region Check Token Data
@@ -196,7 +196,7 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
             });
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible, HR"), HttpGet("FilterByDate")]
+        [Authorize(Roles = "Normal user, Direct responsible, HR, Secretary"), HttpGet("FilterByDate")]
         public async Task<IActionResult> FilterByDate(GetUserAdvanceByDateRequestDto request)
         {
             #region Check Token Data
@@ -222,7 +222,7 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
             }); ;
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible, HR"), HttpPut("UpdateAdvance")]
+        [Authorize(Roles = "Normal user, Direct responsible, HR, Secretary"), HttpPut("UpdateAdvance")]
         public IActionResult UpdateAdvance(UpdateAdvanceRequestDto request)
         {
             var result = _advanceRepo.GetAdvanceById(request.Id);
@@ -267,7 +267,7 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
 
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible, HR, Manager"), HttpGet("ViewDetails")]
+        [Authorize(Roles = "Normal user, Direct responsible, HR, Manager, Secretary"), HttpGet("ViewDetails")]
         public async Task<IActionResult> ViewDetails(ViewDetailsRequestDto request)
         {
             var result = _advanceRepo.GetAdvanceById(request.Id);
@@ -354,7 +354,7 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
 
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible, HR, Manager"), HttpGet("GetCurrency")]
+        [Authorize(Roles = "Normal user, Direct responsible, HR, Manager, Secretary"), HttpGet("GetCurrency")]
         public async Task<IActionResult> GetCurrency()
         {
             var Currency = await _advanceRepo.GetCurrency();
@@ -371,7 +371,7 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
             return Ok(Currency);
         }
 
-        [Authorize(Roles = "Manager, Direct responsible, HR"), HttpGet("GetAdvanceForApprover")]
+        [Authorize(Roles = "Manager, Direct responsible, HR, Secretary"), HttpGet("GetAdvanceForApprover")]
         public async Task<IActionResult> GetAdvanceForApprover(GetAdvanceForApproverRequestDto request)
         {
             #region Check Token Data
@@ -399,7 +399,7 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
         }
 
 
-        [Authorize(Roles = "Manager, Direct responsible, HR"), HttpGet("GetAddvanceForApproverByDate")]
+        [Authorize(Roles = "Manager, Direct responsible, HR, Secretary"), HttpGet("GetAddvanceForApproverByDate")]
         public async Task<IActionResult> GetAddvanceForApproverByDate(GetAdvanceForApproverByDateRequestDto request)
         {
             #region Check Token Data
@@ -425,7 +425,7 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
                 MessageEn = "No Data",
             });
         }
-        [Authorize(Roles = "Manager, Direct responsible, HR"), HttpGet("GetAddvanceForApproverByName")]
+        [Authorize(Roles = "Manager, Direct responsible, HR, Secretary"), HttpGet("GetAddvanceForApproverByName")]
         public async Task<IActionResult> GetAddvanceForApproverByName(GetAdvanceForApproverByNameRequestDto request)
         {
             #region Check Token Data
@@ -452,7 +452,7 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
             });
         }
 
-        [Authorize(Roles = "Manager, Direct responsible, HR"), HttpPut("Approve")]
+        [Authorize(Roles = "Manager, Direct responsible, HR, Secretary"), HttpPut("Approve")]
         public async Task<IActionResult> Approve(ApproveRequestDto request)
         {
             #region Check Token Data

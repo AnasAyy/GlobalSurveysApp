@@ -28,7 +28,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
         }
 
 
-        [Authorize(Roles = "Normal user, Direct responsible, HR"), HttpPost("AddTimeOff")]
+        [Authorize(Roles = "Normal user, Direct responsible, HR, Secretary"), HttpPost("AddTimeOff")]
         public async Task<ActionResult<object>> AddTimeOff(AddTimeOffRequestDto request)
         {
             #region Check Token Data
@@ -170,7 +170,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
 
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible, HR, Manager"), HttpGet("ViewUserTimeOff")]
+        [Authorize(Roles = "Normal user, Direct responsible, HR, Manager, Secretary"), HttpGet("ViewUserTimeOff")]
         public async Task<IActionResult> ViewUserTimeOff(GetUserTimeOffRequestDto request)
         {
             #region Check Token Data
@@ -195,7 +195,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
             });
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible, HR"), HttpGet("FilterByDate")]
+        [Authorize(Roles = "Normal user, Direct responsible, HR, Secretary"), HttpGet("FilterByDate")]
         public async Task<IActionResult> FilterByDate(GetUserTimeOffByDateRequestDto request)
         {
             #region Check Token Data
@@ -221,7 +221,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
             }); ;
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible, HR"), HttpPut("UpdateTimeOff")]
+        [Authorize(Roles = "Normal user, Direct responsible, HR, Secretary"), HttpPut("UpdateTimeOff")]
         public IActionResult UpdateTimeOff(UpdateTimeOffRequestDto request)
         {
             var result = _timeOffRepo.GetTimeOffById(request.Id);
@@ -268,7 +268,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
 
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible, HR, Manager"), HttpGet("ViewDetails")]
+        [Authorize(Roles = "Normal user, Direct responsible, HR, Manager, Secretary"), HttpGet("ViewDetails")]
         public async Task<IActionResult> ViewDetails(ViewDetailsRequestDto request)
         {
             var result = _timeOffRepo.GetTimeOffById(request.Id);
@@ -357,7 +357,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
 
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible, HR, Manager"), HttpGet("GetSubsituteEmployee")]
+        [Authorize(Roles = "Normal user, Direct responsible, HR, Manager, Secretary"), HttpGet("GetSubsituteEmployee")]
         public async Task<IActionResult> GetSubsituteEmployee()
         {
             #region Check Token Data
@@ -381,7 +381,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
             return Ok(subsituteEmployees);
         }
 
-        [Authorize(Roles = "Normal user, Direct responsible, HR, Manager"), HttpGet("GetTypes")]
+        [Authorize(Roles = "Normal user, Direct responsible, HR, Manager, Secretary"), HttpGet("GetTypes")]
         public async Task<IActionResult> GetTypes()
         {
             var types = await _timeOffRepo.GetTypes();
@@ -398,7 +398,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
             return Ok(types);
         }
 
-        [Authorize(Roles = "Manager, Direct responsible, HR"), HttpGet("GetTimeOffForApprover")]
+        [Authorize(Roles = "Manager, Direct responsible, HR, Secretary"), HttpGet("GetTimeOffForApprover")]
         public async Task<IActionResult> GetTimeOffForApprover(GetTimeOffForApproverRequestDto request)
         {
             #region Check Token Data
@@ -425,7 +425,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
             });
         }
 
-        [Authorize(Roles = "Manager, Direct responsible, HR"), HttpGet("GetTimeOffForApproverByDate")]
+        [Authorize(Roles = "Manager, Direct responsible, HR, Secretary"), HttpGet("GetTimeOffForApproverByDate")]
         public async Task<IActionResult> GetTimeOffForApproverByDate(GetTimeOffForApproverByDAteRequestDto request)
         {
             #region Check Token Data
@@ -452,7 +452,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
             });
         }
 
-        [Authorize(Roles = "Manager, Direct responsible, HR"), HttpGet("GetTimeOffForApproverByName")]
+        [Authorize(Roles = "Manager, Direct responsible, HR, Secretary"), HttpGet("GetTimeOffForApproverByName")]
         public async Task<IActionResult> GetTimeOffForApproverByName(GetTimeOffForApproverByNameDto request)
         {
             #region Check Token Data
@@ -479,7 +479,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
             });
         }
 
-        [Authorize(Roles = "Manager, Direct responsible, HR"), HttpPut("Approve")]
+        [Authorize(Roles = "Manager, Direct responsible, HR, Secretary"), HttpPut("Approve")]
         public async Task<IActionResult> Approve(ApproveRequestDto request)
         {
             #region Check Token Data
