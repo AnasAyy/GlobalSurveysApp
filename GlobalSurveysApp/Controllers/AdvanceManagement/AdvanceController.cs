@@ -488,7 +488,11 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
                 {
                     result.Status = RequestStatus.Rejected;
                 }
-                result.Note = request.Note;
+                if(request.Note != null)
+                {
+                    result.Note = request.Note;
+                }
+                
                 result.CanViewed = false;
                 result.UpdatedAt = DateTime.Now;
                 await _advanceRepo.UpdateApprover(result);
@@ -529,7 +533,10 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
                 {
                     result.Status = RequestStatus.Rejected;
                 }
-                result.Note = request.Note;
+                if (request.Note != null)
+                {
+                    result.Note = request.Note;
+                }
                 result.CanViewed = false;
                 result.UpdatedAt = DateTime.Now;
                 await _advanceRepo.UpdateApprover(result);
@@ -565,7 +572,10 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
                 if (request.Status == 1)
                 {
                     result.Status = RequestStatus.Accepted;
-                    result.Note = request.Note;
+                    if (request.Note != null)
+                    {
+                        result.Note = request.Note;
+                    }
                     result.CanViewed = false;
                     result.UpdatedAt = DateTime.Now;
                     await _advanceRepo.UpdateApprover(result);
@@ -583,7 +593,10 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
                 if (request.Status == 2)
                 {
                     result.Status = RequestStatus.Rejected;
-                    result.Note = request.Note;
+                    if (request.Note != null)
+                    {
+                        result.Note = request.Note;
+                    }
                     result.UpdatedAt = DateTime.Now;
                     await _advanceRepo.UpdateApprover(result);
                     var requestUser = _advanceRepo.GetAdvanceById(result.RequestId);

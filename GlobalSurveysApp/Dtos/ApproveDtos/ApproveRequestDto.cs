@@ -8,6 +8,7 @@ namespace GlobalSurveysApp.Dtos.ApproveDtos
         public int RequestId { get; set; }
         [RegularExpression(@"^\d+$", ErrorMessage = "Invalid input")]
         public int Status { get; set; }
-        public string Note { get; set; } = null!;
+
+        public string? Note { get; set; } 
     }
 }
