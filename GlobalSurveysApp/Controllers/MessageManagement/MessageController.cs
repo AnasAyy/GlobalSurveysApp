@@ -178,6 +178,11 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
                     MessageEn = "Oops, something went wrong. Please try again.",
                 });
             }
+            if (request.Type == 1038)
+            {
+                string fcm = await _advanceRepo.GetFCM(request.ToWhom);
+                return new JsonResult(new { FCM = fcm });
+            }
             return Ok();
         }
 

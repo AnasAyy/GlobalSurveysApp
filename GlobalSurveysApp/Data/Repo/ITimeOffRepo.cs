@@ -284,7 +284,7 @@ namespace GlobalSurveysApp.Data.Repo
             var result = await Task.Run(() =>
             {
                 return (from u in _context.Users
-                        where u.Id != userId &&
+                        where u.Id != userId && u.RoleId != 1 && u.IsActive == true &&
                               !(from t in _context.TimeOffs
                                 where t.UserId == u.Id &&
                                       DateTime.Now.Date >= t.From.Date &&

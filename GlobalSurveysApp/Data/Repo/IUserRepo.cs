@@ -219,6 +219,7 @@ namespace GlobalSurveysApp.Data.Repo
             return from u in _context.Users
                    where (u.FirstName + " " + u.SecondName + " " + u.ThirdName + " " + u.LastName).Contains(name)
                    where u.IsActive == true
+                   orderby u.Id descending
                    select new GetAllUSersResponseDto
                    {
                        Id = u.Id,
@@ -233,6 +234,7 @@ namespace GlobalSurveysApp.Data.Repo
             return from u in _context.Users
                    where (u.FirstName + " " + u.SecondName + " " + u.ThirdName + " " + u.LastName).Contains(name)
                    where u.IsActive == false
+                   orderby u.Id descending
                    select new GetAllUSersResponseDto
                    {
                        Id = u.Id,
