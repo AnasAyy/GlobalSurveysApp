@@ -360,6 +360,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
         [Authorize(Roles = "Normal user, Direct responsible, HR, Manager, Secretary"), HttpGet("GetSubsituteEmployee")]
         public async Task<IActionResult> GetSubsituteEmployee()
         {
+
             #region Check Token Data
             var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
             if (userId == null)
@@ -367,7 +368,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
                 return Unauthorized();
             }
             #endregion
-            var subsituteEmployees = await _timeOffRepo.GetSubsituteEmployee(Convert.ToInt32(userId.Value));
+            var subsituteEmployees = await _timeOffRepo.testGetFilteredUsersAsync(Convert.ToInt32(userId.Value));
             if (subsituteEmployees == null)
             {
                 return Ok(new ErrorDto
@@ -379,7 +380,53 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
             }
 
             return Ok(subsituteEmployees);
+
+
+            //#region Check Token Data
+            //var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
+            //if (userId == null)
+            //{
+            //    return Unauthorized();
+            //}
+            //#endregion
+            //var subsituteEmployees = await _timeOffRepo.GetSubsituteEmployee(Convert.ToInt32(userId.Value));
+            //if (subsituteEmployees == null)
+            //{
+            //    return Ok(new ErrorDto
+            //    {
+            //        Code = 400,
+            //        MessageAr = "لا يوجد بيانات",
+            //        MessageEn = "No Data",
+            //    });
+            //}
+
+            //return Ok(subsituteEmployees);
         }
+
+
+        //[HttpPost("testGetSubsituteEmployee")]
+        //public async Task<IActionResult> testGetSubsituteEmployee()
+        //{
+        //    #region Check Token Data
+        //    var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
+        //    if (userId == null)
+        //    {
+        //        return Unauthorized();
+        //    }
+        //    #endregion
+        //    var subsituteEmployees = await _timeOffRepo.testGetFilteredUsersAsync(Convert.ToInt32(userId.Value));
+        //    if (subsituteEmployees == null)
+        //    {
+        //        return Ok(new ErrorDto
+        //        {
+        //            Code = 400,
+        //            MessageAr = "لا يوجد بيانات",
+        //            MessageEn = "No Data",
+        //        });
+        //    }
+
+        //    return Ok(subsituteEmployees);
+        //}
 
         [Authorize(Roles = "Normal user, Direct responsible, HR, Manager, Secretary"), HttpGet("GetTypes")]
         public async Task<IActionResult> GetTypes()

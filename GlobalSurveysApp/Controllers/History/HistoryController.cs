@@ -212,6 +212,71 @@ namespace GlobalSurveysApp.Controllers.History
                 MessageEn = "No Data",
             }); ;
         }
+
+        [Authorize(Roles = "HR, Manager"), HttpGet("GenaralFilter")]
+        public async Task<IActionResult> GenaralFilter(GenaralFilterRequestDto request)
+        {
+            var result = await _historyRepo.GetUsers(request.type,request.From,request.To);
+            if (result != null)
+            {
+                var list = PagedList<GenaralFilterResponseDto>.ToPagedList(result, request.Page, 10);
+                Response.Headers.Add("X-Pagination", System.Text.Json.JsonSerializer.Serialize(list.Paganation));
+                return Ok(list);
+            }
+            return Ok(new ErrorDto
+            {
+                Code = 400,
+                MessageAr = "لا يوجد بيانات",
+                MessageEn = "No Data",
+            });
+        }
+
+        [Authorize(Roles = "HR, Manager"), HttpGet("GetData")]
+        public async Task<IActionResult> GetData(GenaralFilterRequestDto request)
+        {
+            if(request.type == 1)
+            {
+                var result = await _historyRepo.GetAdvanceForUserByDate(request.Id, request.From, request.To);
+                if (result != null)
+                {
+                    var list = PagedList<GetAllAdvanceResponseDto>.ToPagedList(result, request.Page, 10);
+                    Response.Headers.Add("X-Pagination", System.Text.Json.JsonSerializer.Serialize(list.Paganation));
+                    return Ok(list);
+                }
+                
+            }
+            else if (request.type == 2)
+            {
+                var result = await _historyRepo.GetTimeForUserByDate(request.Id, request.From, request.To);
+                if (result != null)
+                {
+                    var list = PagedList<GetAllTimeOffResponseDto>.ToPagedList(result, request.Page, 10);
+                    Response.Headers.Add("X-Pagination", System.Text.Json.JsonSerializer.Serialize(list.Paganation));
+                    return Ok(list);
+                }
+                
+            }
+            else if(request.type == 3)
+            {
+                var result = await _historyRepo.GetComplaintForUserByDate(request.Id, request.From, request.To);
+                if (result != null)
+                {
+                    var list = PagedList<GetAllComplaintResponseDto>.ToPagedList(result, request.Page, 10);
+                    Response.Headers.Add("X-Pagination", System.Text.Json.JsonSerializer.Serialize(list.Paganation));
+                    return Ok(list);
+                }
+                
+            }
+
+            return Ok(new ErrorDto
+            {
+                Code = 400,
+                MessageAr = "لا يوجد بيانات",
+                MessageEn = "No Data",
+            });
+
+
+        }
     }
 }
 

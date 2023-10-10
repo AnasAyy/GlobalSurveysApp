@@ -34,6 +34,8 @@ namespace GlobalSurveysApp.Data.Repo
         public Task<Approver?> GetApprover(int requestId, int approvalId);
         public Task UpdateApprover(Approver approver);
         public Task<bool> SaveChanges();
+        public Task<IEnumerable<object>> testGetFilteredUsersAsync(int userId);
+
     }
 
     public class TimeOffs : ITimeOffRepo
@@ -151,7 +153,6 @@ namespace GlobalSurveysApp.Data.Repo
 
         public async Task<List<GetSubsituteEmployeeResponseDto>> GetSubsituteEmployee(int userId)
         {
-
 
             var substitutes = await _context.Users
             .Where(user => user.Id != userId)
@@ -277,7 +278,28 @@ namespace GlobalSurveysApp.Data.Repo
             }
             return false;
         }
+        //////////////////////////////////////////////
+        public async Task<IEnumerable<object>> testGetFilteredUsersAsync(int userId)
+        {
+            var result = await Task.Run(() =>
+            {
+                return (from u in _context.Users
+                        where u.Id != userId &&
+                              !(from t in _context.TimeOffs
+                                where t.UserId == u.Id &&
+                                      DateTime.Now.Date >= t.From.Date &&
+                                      DateTime.Now.Date <= t.To.Date &&
+                                      t.Status == RequestStatus.Accepted
+                                select 1).Any()
+                        select new
+                        {
+                            u.Id,
+                            Name = u.FirstName + " " + u.LastName
+                        }).ToList();
+            });
 
+            return result;
+        }
 
     }
 }
