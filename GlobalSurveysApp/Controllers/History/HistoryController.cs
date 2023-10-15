@@ -232,7 +232,7 @@ namespace GlobalSurveysApp.Controllers.History
         }
 
         [Authorize(Roles = "HR, Manager"), HttpGet("GetData")]
-        public async Task<IActionResult> GetData(GenaralFilterRequestDto request)
+        public async Task<IActionResult> GetData(GetAllDataResponseDto request)
         {
             if(request.type == 1)
             {

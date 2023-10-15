@@ -83,6 +83,22 @@ namespace GlobalSurveysApp.Controllers.MessageManagement
             return Ok(types);
         }
 
+        [Authorize(Roles = "Direct responsible, Normal user, HR, Manager, Secretary"), HttpGet("GetGroups")]
+        public async Task<IActionResult> GetGroups()
+        {
+            var types = await _messageRepo.GetGroups();
+            if (types == null)
+            {
+                return Ok(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "لا يوجد بيانات",
+                    MessageEn = "No Data",
+                });
+            }
+
+            return Ok(types);
+        }
 
 
         [Authorize(Roles = "HR, Manager, Secretary"), HttpPost("CreateMessage")]

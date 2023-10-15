@@ -15,6 +15,7 @@ namespace GlobalSurveysApp.Data.Repo
         public void CreateFCM(FCMtoken fCMtoken);
         public void DeleteFCM(int Id);
         public string? GetDep(int depId); 
+        public string? GetGroup(int groupId); 
         
         
     }
@@ -104,6 +105,9 @@ namespace GlobalSurveysApp.Data.Repo
         public string? GetDep(int depId)
         {
             return _context.PublicLists.SingleOrDefault(x => x.Id == depId)?.NameEN;
+        }public string? GetGroup(int groupId)
+        {
+            return _context.PublicLists.SingleOrDefault(x => x.Id == groupId)?.NameEN;
         }
     }
 }

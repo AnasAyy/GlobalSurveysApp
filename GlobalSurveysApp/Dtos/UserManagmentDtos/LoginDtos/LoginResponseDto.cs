@@ -19,6 +19,7 @@ namespace GlobalSurveysApp.Dtos.UserManagmentDtos.LoginManagement
         public string UserRole { get; set; } = null!;
         public bool IsVerified { get; set; }
         public string Department { get; set; } = null!;
+        public string Group { get;set; } = null!;
 
     }
 }

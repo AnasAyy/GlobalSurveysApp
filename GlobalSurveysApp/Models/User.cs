@@ -54,7 +54,7 @@ namespace GlobalSurveysApp.Models
         public string Password { get; set; }= null!;//
         [Required] 
         public string QRcode { get; set; } = null!;
-
+        
         public byte[]? IdCard { get; set; } = null!;
         public string? PersonalPhoto { get; set; }//
         [Required]

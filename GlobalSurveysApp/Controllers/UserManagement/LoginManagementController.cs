@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace GlobalSurveysApp.Controllers.UserManagement
 {
@@ -77,7 +78,7 @@ namespace GlobalSurveysApp.Controllers.UserManagement
 
              #region Get User Department
             string ?department = _userRepo.GetDep(user.Department);
-            
+            string ?group = _userRepo.GetGroup(user.placeOfBirth);
             #endregion
 
             #region Last Login
@@ -130,7 +131,8 @@ namespace GlobalSurveysApp.Controllers.UserManagement
                     PhoneNumber = user.WorkMobile,
                     UserRole = role,
                     IsVerified = user.IsVerified,
-                    Department = department!
+                    Department = department!,
+                    Group = group!,
                 }
 
 
@@ -177,6 +179,7 @@ namespace GlobalSurveysApp.Controllers.UserManagement
 
             #region Get User Department
             string? department = _userRepo.GetDep(user.Department);
+            string? group = _userRepo.GetGroup(user.placeOfBirth);
 
             #endregion
 
@@ -221,7 +224,8 @@ namespace GlobalSurveysApp.Controllers.UserManagement
                     PhoneNumber = user.WorkMobile,
                     UserRole = role,
                     IsVerified = user.IsVerified,
-                    Department = department!
+                    Department = department!,
+                    Group = group!
                 }
             });
             #endregion

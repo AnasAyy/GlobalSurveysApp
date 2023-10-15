@@ -13,6 +13,7 @@ namespace GlobalSurveysApp.Data.Repo
         public Task CreateMessage(Message message);
 
         public Task<List<Publics>> GetMessageType();
+        public Task<List<Publics>> GetGroups();
         public Task<IQueryable<GetMessagesResponseDto>> GetMessagesForTeller(int userId);
         public Message? GetMessageById(int id);
         public void UpdateMessage(Message message);
@@ -64,6 +65,21 @@ namespace GlobalSurveysApp.Data.Repo
         {
             var department = await _context.PublicLists
                 .Where(x => x.Type == 1035)
+                .Select(x => new Publics
+                {
+                    Id = x.Id,
+                    NameAR = x.NameAR,
+                    NameEN = x.NameEN
+                })
+                .ToListAsync();
+
+            return department;
+        }
+
+        public async Task<List<Publics>> GetGroups()
+        {
+            var department = await _context.PublicLists
+                .Where(x => x.Type == 1014)
                 .Select(x => new Publics
                 {
                     Id = x.Id,
@@ -142,6 +158,16 @@ namespace GlobalSurveysApp.Data.Repo
                 if (message.Type == 1038)
                 {
                     var user = await _context.Users.SingleOrDefaultAsync(y => y.Id == message.ToWhom);
+                    if (user != null)
+                    {
+                        ToWhomeAR = message.ToWhom.ToString();
+                        ToWhomeEN = message.ToWhom.ToString();
+                    }
+
+                }
+                if (message.Type == 1087)
+                {
+                    var user = await _context.PublicLists.SingleOrDefaultAsync(y => y.Id == message.ToWhom);
                     if (user != null)
                     {
                         ToWhomeAR = message.ToWhom.ToString();
