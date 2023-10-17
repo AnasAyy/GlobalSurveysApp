@@ -23,6 +23,7 @@ namespace GlobalSurveysApp.Models
         [Required]
         public RequestStatus Status { get; set; } = RequestStatus.Pending;
         
+        public RequestStatus ?SubEmpStatus { get; set; }
         public bool IsUpdated { get; set; } = false;
         [Required]
         public int UserId { get; set; }
