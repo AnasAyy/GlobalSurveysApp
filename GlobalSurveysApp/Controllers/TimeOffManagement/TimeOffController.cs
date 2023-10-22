@@ -551,7 +551,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
                 });
             }
 
-            if (userRole.Value == "Direct responsible")
+            if (userRole.Value == "Direct responsible" || userRole.Value == "Secretary")
             {
                 if (request.Status == 1)
                 {
