@@ -477,7 +477,7 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
                 });
             }
 
-            if (userRole.Value == "Direct responsible" || userRole.Value == "Direct responsible")
+            if (userRole.Value == "Direct responsible" || userRole.Value == "Secretary")
             {
                 if (request.Status == 1)
                 {
