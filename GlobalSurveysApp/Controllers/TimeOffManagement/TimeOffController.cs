@@ -162,12 +162,6 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
 
             #endregion
 
-
-
-
-
-
-
         }
 
         [Authorize(Roles = "Normal user, Direct responsible, HR, Manager, Secretary"), HttpGet("ViewUserTimeOff")]
