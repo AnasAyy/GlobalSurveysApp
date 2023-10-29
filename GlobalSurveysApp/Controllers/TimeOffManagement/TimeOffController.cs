@@ -26,7 +26,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
             _userRepo = userRepo;
             _mapper = mapper;
         }
-
+         
 
         [Authorize(Roles = "Normal user, Direct responsible, HR, Secretary"), HttpPost("AddTimeOff")]
         public async Task<ActionResult<object>> AddTimeOff(AddTimeOffRequestDto request)
