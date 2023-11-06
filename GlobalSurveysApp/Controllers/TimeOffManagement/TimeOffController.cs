@@ -20,13 +20,13 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
         private readonly IUserRepo _userRepo;
         private readonly IMapper _mapper;
 
-        public TimeOffController(ITimeOffRepo timeOffRepo, IUserRepo userRepo, IMapper mapper )
+        public TimeOffController(ITimeOffRepo timeOffRepo, IUserRepo userRepo, IMapper mapper)
         {
             _timeOffRepo = timeOffRepo;
             _userRepo = userRepo;
             _mapper = mapper;
         }
-         
+
 
         [Authorize(Roles = "Normal user, Direct responsible, HR, Secretary"), HttpPost("AddTimeOff")]
         public async Task<ActionResult<object>> AddTimeOff(AddTimeOffRequestDto request)
@@ -39,8 +39,6 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
             }
             #endregion
 
-
-
             #region Add Time Off
 
             var timeOff = _mapper.Map<TimeOff>(request);
@@ -48,6 +46,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
             int.TryParse(userId.Value, out userIdValue);
             timeOff.UserId = userIdValue;
             timeOff.CreatedAt = DateTime.Now;
+            timeOff.SubEmpStatus = RequestStatus.Pending;
             var timeOffId = await _timeOffRepo.CreateTimeOff(timeOff);
 
             if (timeOffId <= 0)
@@ -61,95 +60,9 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
             }
             #endregion
 
-            #region Add Approver
-
-            List<Approver> approvers = new List<Approver>();
             FCMtokenResponseDto FC = new FCMtokenResponseDto();
-
+            FC.FCMToken = await _timeOffRepo.GetFCM(request.SubstituteEmployeeId);
             var user = await _timeOffRepo.GetUserById(userIdValue);
-            if (user != null && user.DirectResponsibleId != null)
-            {
-                approvers.Add(new Approver
-                {
-                    RequestId = timeOffId,
-                    ApproverType = 1, // 1 For DirectResponsible 
-                    RequestType = 2, // 2 For Time Request
-                    CanViewed = true,
-                    UserId = user.DirectResponsibleId
-                });
-                FC.FCMToken = await _timeOffRepo.GetFCM(user.DirectResponsibleId);
-            }
-
-            int? hr = await _timeOffRepo.GetIdByRole("HR").FirstOrDefaultAsync();
-            if (hr != 0 && hr != userIdValue && user?.DirectResponsibleId != null)
-            {
-                approvers.Add(new Approver
-                {
-                    RequestId = timeOffId,
-                    ApproverType = 2,  // 2 For HR
-                    RequestType = 2,  // 2 For TimeOff Request
-                    UserId = hr,
-                    CanViewed = false,
-
-                });
-            }
-            if (hr != 0 && hr != userIdValue && user?.DirectResponsibleId == null)
-            {
-                approvers.Add(new Approver
-                {
-                    RequestId = timeOffId,
-                    ApproverType = 2,  // 2 For HR
-                    RequestType = 2,  // 2 For TimeOff Request
-                    UserId = hr,
-                    CanViewed = true,
-
-                });
-                FC.FCMToken = await _timeOffRepo.GetFCM(hr);
-
-            }
-
-
-
-            int? manager = await _timeOffRepo.GetIdByRole("Manager").FirstOrDefaultAsync();
-            if (manager != 0 && manager != userIdValue && hr != 0)
-            {
-                approvers.Add(new Approver
-                {
-                    RequestId = timeOffId,
-                    ApproverType = 3, // 3 For Manager
-                    RequestType = 2, // 1 For Time Request
-                    UserId = manager,
-                    CanViewed = false,
-                });
-                //FC.ManagerFCMToken = await _advanceRepo.GetFCM(manager);
-            }
-            if (manager != 0 && manager != userIdValue && hr == 0)
-            {
-                approvers.Add(new Approver
-                {
-                    RequestId = timeOffId,
-                    ApproverType = 3, // 3 For Manager
-                    RequestType = 2,  // 2 For TimeOff Request
-                    UserId = manager,
-                    CanViewed = true,
-                });
-                FC.FCMToken = await _timeOffRepo.GetFCM(manager);
-            }
-
-
-
-            await _timeOffRepo.CreateApprover(approvers);
-            if (!_userRepo.SaveChanges())
-            {
-                return BadRequest(new ErrorDto
-                {
-                    Code = 400,
-                    MessageAr = "عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.",
-                    MessageEn = "Oops, something went wrong. Please try again.",
-                });
-            }
-
-
 
             FC.MessageAR = "طلب اجازة جديد من " + user?.FirstName + " " + user?.LastName;
             FC.MessageEN = "New Time Off request from " + user?.FirstName + " " + user?.LastName;
@@ -159,9 +72,6 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
                 code = 200,
                 FC,
             });
-
-            #endregion
-
         }
 
         [Authorize(Roles = "Normal user, Direct responsible, HR, Manager, Secretary"), HttpGet("ViewUserTimeOff")]
@@ -294,6 +204,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
             details.To = result.To;
             details.EmergencyNumber = result.EmergencyNumber;
             details.SubsituteEmployeeId = result.SubstituteEmployeeId;
+            details.SubEmpStatus = result.SubEmpStatus;
 
             if (approvers.Count == 3)
             {
@@ -396,7 +307,6 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
 
             //return Ok(subsituteEmployees);
         }
-
 
         //[HttpPost("testGetSubsituteEmployee")]
         //public async Task<IActionResult> testGetSubsituteEmployee()
@@ -532,6 +442,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
             }
             #endregion
             FCMtokenResponseDto FC = new FCMtokenResponseDto();
+            FCMtokenResponseDto FCForHR = new FCMtokenResponseDto();
             var timeOff = _timeOffRepo.GetTimeOffById(request.RequestId);
 
             var result = await _timeOffRepo.GetApprover(request.RequestId, Convert.ToInt32(userId.Value));
@@ -604,7 +515,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
                 {
                     result.Note = request.Note;
                 }
-               
+
                 result.CanViewed = false;
                 result.UpdatedAt = DateTime.Now;
                 await _timeOffRepo.UpdateApprover(result);
@@ -657,6 +568,14 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
                     FC.MessageAR = "تم قبول طلب الاجازة الخاص بك ";
                     FC.MessageEN = "Your Time Off request has been accepted ";
                     FC.FCMToken = await _timeOffRepo.GetFCM(Convert.ToInt32(requestUser.UserId));
+
+                    var user = _userRepo.GetUserById(requestUser.UserId);
+                    int hr = await _timeOffRepo.GetIdByRole("HR").FirstOrDefaultAsync();
+                    FCForHR.MessageAR = " تم قبول طلب الاجازة الخاص ب " + user?.FirstName + " " + user?.LastName;
+                    FCForHR.MessageEN = "Time Off request For " + user?.FirstName + " " + user?.LastName +
+                        " has been accepted ";
+                    FCForHR.FCMToken = await _timeOffRepo.GetFCM(hr);
+
                 }
                 if (request.Status == 2)
                 {
@@ -678,7 +597,14 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
                     FC.MessageAR = "تم رفض طلب الاجازة الخاص بك ";
                     FC.MessageEN = "Your Time Off request has been rejected ";
                     FC.FCMToken = await _timeOffRepo.GetFCM(Convert.ToInt32(requestUser.UserId));
-                } 
+
+                    var user = _userRepo.GetUserById(requestUser.UserId);
+                    int hr = await _timeOffRepo.GetIdByRole("HR").FirstOrDefaultAsync();
+                    FCForHR.MessageAR = "تم رفض طلب الاجازة الخاص ب " + user?.FirstName + " " + user?.LastName;
+                    FCForHR.MessageEN = "Time Off request For " + user?.FirstName + " " + user?.LastName +
+                        " has been rejected ";
+                    FCForHR.FCMToken = await _timeOffRepo.GetFCM(hr);
+                }
                 timeOff.IsUpdated = true;
             }
             _timeOffRepo.UpdateTimeOff(timeOff);
@@ -695,8 +621,198 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
             {
                 code = 200,
                 FC,
+                FCForHR
             });
 
+
+        }
+
+
+        [Authorize(Roles = "Manager, Direct responsible, HR, Secretary, Normal user"), HttpPost("ApproveBySubEmp")]
+        public async Task<IActionResult> ApproveBySumEmp(ApproveBySumEmpRequestDtos request)
+        {
+            var timeOff = _timeOffRepo.GetTimeOffById(request.RequestId);
+            if (request.Status == 2)
+            {
+
+                if (timeOff != null)
+                {
+                    timeOff.SubEmpStatus = RequestStatus.Rejected;
+                    _timeOffRepo.UpdateTimeOff(timeOff);
+                    if (!_userRepo.SaveChanges())
+                    {
+                        return BadRequest(new ErrorDto
+                        {
+                            Code = 400,
+                            MessageAr = "عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+                            MessageEn = "Oops, something went wrong. Please try again.",
+                        });
+                    }
+
+                    FCMtokenResponseDto FC = new FCMtokenResponseDto();
+                    FC.FCMToken = await _timeOffRepo.GetFCM(timeOff.UserId);
+                    FC.MessageAR = "تم رفض طلب الاجازة الخاص بك ";
+                    FC.MessageEN = "Your Time Off request has been rejected ";
+
+                    return new JsonResult(new
+                    {
+                        code = 200,
+                        FC,
+                    });
+                }
+            }
+            if (request.Status == 1)
+            {
+
+
+
+                #region Add Approver
+
+                List<Approver> approvers = new List<Approver>();
+                FCMtokenResponseDto FC = new FCMtokenResponseDto();
+
+                if (timeOff != null)
+                {
+
+                    timeOff.SubEmpStatus = RequestStatus.Accepted;
+                    _timeOffRepo.UpdateTimeOff(timeOff);
+                    if (!_userRepo.SaveChanges())
+                    {
+                        return BadRequest(new ErrorDto
+                        {
+                            Code = 400,
+                            MessageAr = "عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+                            MessageEn = "Oops, something went wrong. Please try again.",
+                        });
+                    }
+
+                    var user = await _timeOffRepo.GetUserById(timeOff.UserId);
+                    if (user != null && user.DirectResponsibleId != null)
+                    {
+                        approvers.Add(new Approver
+                        {
+                            RequestId = request.RequestId,
+                            ApproverType = 1, // 1 For DirectResponsible 
+                            RequestType = 2, // 2 For Time Request
+                            CanViewed = true,
+                            UserId = user.DirectResponsibleId
+                        });
+                        FC.FCMToken = await _timeOffRepo.GetFCM(user.DirectResponsibleId);
+                    }
+
+                    int? hr = await _timeOffRepo.GetIdByRole("HR").FirstOrDefaultAsync();
+                    if (hr != 0 && hr != timeOff.UserId && user?.DirectResponsibleId != null)
+                    {
+                        approvers.Add(new Approver
+                        {
+                            RequestId = timeOff.UserId,
+                            ApproverType = 2,  // 2 For HR
+                            RequestType = 2,  // 2 For TimeOff Request
+                            UserId = hr,
+                            CanViewed = false,
+
+                        });
+                    }
+                    if (hr != 0 && hr != timeOff.UserId && user?.DirectResponsibleId == null)
+                    {
+                        approvers.Add(new Approver
+                        {
+                            RequestId = timeOff.Id,
+                            ApproverType = 2,  // 2 For HR
+                            RequestType = 2,  // 2 For TimeOff Request
+                            UserId = hr,
+                            CanViewed = true,
+
+                        });
+                        FC.FCMToken = await _timeOffRepo.GetFCM(hr);
+
+                    }
+
+
+
+                    int? manager = await _timeOffRepo.GetIdByRole("Manager").FirstOrDefaultAsync();
+                    if (manager != 0 && manager != timeOff.UserId && hr != 0)
+                    {
+                        approvers.Add(new Approver
+                        {
+                            RequestId = timeOff.Id,
+                            ApproverType = 3, // 3 For Manager
+                            RequestType = 2, // 1 For Time Request
+                            UserId = manager,
+                            CanViewed = false,
+                        });
+                        //FC.ManagerFCMToken = await _advanceRepo.GetFCM(manager);
+                    }
+                    if (manager != 0 && manager != timeOff.UserId && hr == 0)
+                    {
+                        approvers.Add(new Approver
+                        {
+                            RequestId = timeOff.Id,
+                            ApproverType = 3, // 3 For Manager
+                            RequestType = 2,  // 2 For TimeOff Request
+                            UserId = manager,
+                            CanViewed = true,
+                        });
+                        FC.FCMToken = await _timeOffRepo.GetFCM(manager);
+                    }
+
+
+
+                    await _timeOffRepo.CreateApprover(approvers);
+                    if (!_userRepo.SaveChanges())
+                    {
+                        return BadRequest(new ErrorDto
+                        {
+                            Code = 400,
+                            MessageAr = "عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+                            MessageEn = "Oops, something went wrong. Please try again.",
+                        });
+                    }
+
+
+
+                    FC.MessageAR = "طلب اجازة جديد من " + user?.FirstName + " " + user?.LastName;
+                    FC.MessageEN = "New Time Off request from " + user?.FirstName + " " + user?.LastName;
+
+                    return new JsonResult(new
+                    {
+                        code = 200,
+                        FC,
+                    });
+                }
+                #endregion
+            }
+
+            return null!;
+        }
+
+        [Authorize(Roles = "Manager, Direct responsible, HR, Secretary, Normal user"), HttpGet("TimeoffForSubEmp")]
+        public async Task<IActionResult> TimeoffForSubEmp()
+        {
+            #region Check Token Data
+            var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            #endregion
+
+            var timeoffs = await _timeOffRepo.GetTimeOffsForSubEmp(Convert.ToInt32(userId.Value.ToString()));
+            if (timeoffs.Count == 0)
+            {
+                return Ok(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "لا يوجد بيانات",
+                    MessageEn = "No Data",
+                });
+            }
+
+            return new JsonResult(new
+            {
+                code = 200,
+                timeoffs,
+            });
 
         }
     }

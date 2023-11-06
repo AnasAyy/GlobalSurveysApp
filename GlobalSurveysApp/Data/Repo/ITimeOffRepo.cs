@@ -35,7 +35,7 @@ namespace GlobalSurveysApp.Data.Repo
         public Task UpdateApprover(Approver approver);
         public Task<bool> SaveChanges();
         public Task<IEnumerable<object>> testGetFilteredUsersAsync(int userId);
-
+        public Task<List<TimeOffsForSubEmpResponceDto>> GetTimeOffsForSubEmp(int SubEmp);
     }
 
     public class TimeOffs : ITimeOffRepo
@@ -300,6 +300,29 @@ namespace GlobalSurveysApp.Data.Repo
 
             return result;
         }
+
+        public async Task<List<TimeOffsForSubEmpResponceDto>> GetTimeOffsForSubEmp(int SubEmp)
+        {
+
+            var timeoffs = await (
+            from timeOff in _context.TimeOffs
+            join user in _context.Users on timeOff.UserId equals user.Id
+            where timeOff.SubEmpStatus == RequestStatus.Pending && timeOff.SubstituteEmployeeId == SubEmp
+            orderby timeOff.Id descending
+            select new TimeOffsForSubEmpResponceDto
+            {
+                 Id = timeOff.Id,
+                 Name = user.FirstName + " " + user.LastName,
+                 From = timeOff.From,
+                 Type = timeOff.Type,
+                 Number = timeOff.Number
+            }
+            ).ToListAsync();
+
+            return timeoffs;
+
+        }
+
 
     }
 }

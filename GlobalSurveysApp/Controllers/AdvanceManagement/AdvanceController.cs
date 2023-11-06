@@ -464,6 +464,8 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
             }
             #endregion
             FCMtokenResponseDto FC = new FCMtokenResponseDto();
+            FCMtokenResponseDto FCForHR = new FCMtokenResponseDto();
+
             var advance =  _advanceRepo.GetAdvanceById(request.RequestId);
            
             var result = await _advanceRepo.GetApprover(request.RequestId, Convert.ToInt32(userId.Value));
@@ -589,6 +591,13 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
                     FC.MessageAR = "تم قبول طلب السلفة الخاص بك ";
                     FC.MessageEN = "Your advance request has been accepted ";
                     FC.FCMToken = await _advanceRepo.GetFCM(Convert.ToInt32(requestUser.UserId));
+
+                    var user = _userRepo.GetUserById(requestUser.UserId);
+                    int hr = await _advanceRepo.GetIdByRole("HR").FirstOrDefaultAsync();
+                    FCForHR.MessageAR = " تم قبول طلب السلفة الخاص ب " + user?.FirstName + " " + user?.LastName;
+                    FCForHR.MessageEN = "Advance request For " + user?.FirstName + " " + user?.LastName +
+                        " has been accepted ";
+                    FCForHR.FCMToken = await _advanceRepo.GetFCM(hr);
                 }
                 if (request.Status == 2)
                 {
@@ -609,6 +618,13 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
                     FC.MessageAR = "تم رفض طلب السلفة الخاص بك ";
                     FC.MessageEN = "Your advance request has been rejected ";
                     FC.FCMToken = await _advanceRepo.GetFCM(Convert.ToInt32(requestUser.UserId));
+
+                    var user = _userRepo.GetUserById(requestUser.UserId);
+                    int hr = await _advanceRepo.GetIdByRole("HR").FirstOrDefaultAsync();
+                    FCForHR.MessageAR = "تم رفض طلب السلفة الخاص ب " + user?.FirstName + " " + user?.LastName;
+                    FCForHR.MessageEN = "Advance request For " + user?.FirstName + " " + user?.LastName +
+                        " has been rejected ";
+                    FCForHR.FCMToken = await _advanceRepo.GetFCM(hr);
                 }
                 advance.IsUpdated = true;
             }
@@ -626,6 +642,7 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
             {
                 code = 200,
                 FC,
+                FCForHR
             });
 
 

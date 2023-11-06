@@ -15,7 +15,7 @@ namespace GlobalSurveysApp.Models
         [Required]
         public DateTime To { get; set; }
         [Required]
-        public int Number { get; set; } 
+        public string Number { get; set; } = null!;
         [Required]
         public string EmergencyNumber { get; set; } = null!;
         [Required]

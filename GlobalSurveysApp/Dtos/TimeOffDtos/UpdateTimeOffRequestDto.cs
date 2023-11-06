@@ -15,7 +15,7 @@ namespace GlobalSurveysApp.Dtos.TimeOffDtos
 
         public DateTime To { get; set; }
 
-        public int Number { get; set; } 
+        public string Number { get; set; } = null!; 
 
         public string EmergencyNumber { get; set; } = null!;
 
