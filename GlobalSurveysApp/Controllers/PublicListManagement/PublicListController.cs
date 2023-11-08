@@ -144,6 +144,22 @@ namespace GlobalSurveysApp.Controllers.PublicListManagement
             return NotFound();
         }
 
+        [Authorize(Roles = "Admin"), HttpGet("GetPhoneNumber")]
+        public async Task<IActionResult> GetPhoneNumber()
+        {
+            var result = await _publicList.GetPhoneNumber();
+            if (result != 0)
+            {
+                return new JsonResult(new
+                {
+                    Code = 200,
+                    Number = result,
+                });
+            }
+            return NotFound();
+        }
+
+
 
     }
 }

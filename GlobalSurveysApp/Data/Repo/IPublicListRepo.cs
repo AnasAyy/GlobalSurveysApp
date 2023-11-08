@@ -1,5 +1,6 @@
 ﻿using GlobalSurveysApp.Dtos.PublicListDtos;
 using GlobalSurveysApp.Models;
+using Microsoft.EntityFrameworkCore;
 using static Azure.Core.HttpHeader;
 
 namespace GlobalSurveysApp.Data.Repo
@@ -16,6 +17,9 @@ namespace GlobalSurveysApp.Data.Repo
         public PublicList? GetById(int id);
         
         public bool SaveChanges();
+
+
+        public Task<int> GetPhoneNumber();
 
     }
 
@@ -94,5 +98,23 @@ namespace GlobalSurveysApp.Data.Repo
         {
             return _context.PublicLists.Any(x => x.NameAR == nameAR && x.NameEN == nameEN && x.Type == type && x.Id != id);
         }
+
+
+        public async Task<int> GetPhoneNumber()
+        {
+            var x = await _context.PublicLists.SingleOrDefaultAsync(x => x.Id == 1088);
+            _context.ChangeTracker.Clear();
+            if(x != null)
+            {
+                int number = Convert.ToInt32(x.NameAR.ToString());
+                return number;
+            }
+            return 0;
+            
+        }
+
+       
+
+
     }
 }

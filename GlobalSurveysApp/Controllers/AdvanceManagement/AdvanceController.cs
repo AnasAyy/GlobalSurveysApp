@@ -631,7 +631,8 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
             _advanceRepo.Update(advance);
             if (!_userRepo.SaveChanges())
             {
-                return BadRequest(new ErrorDto
+                return BadRequest(
+                    new ErrorDto
                 {
                     Code = 400,
                     MessageAr = "عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.",
