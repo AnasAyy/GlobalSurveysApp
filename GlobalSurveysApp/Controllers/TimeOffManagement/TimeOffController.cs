@@ -705,7 +705,7 @@ namespace GlobalSurveysApp.Controllers.TimeOffManagement
                     {
                         approvers.Add(new Approver
                         {
-                            RequestId = timeOff.UserId,
+                            RequestId = request.RequestId,
                             ApproverType = 2,  // 2 For HR
                             RequestType = 2,  // 2 For TimeOff Request
                             UserId = hr,
