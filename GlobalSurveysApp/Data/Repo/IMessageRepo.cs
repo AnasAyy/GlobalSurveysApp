@@ -196,6 +196,7 @@ namespace GlobalSurveysApp.Data.Repo
                         where message.UserId != userId
                         where message.Type == 1036 ||
                               (message.Type == 1038 && message.ToWhom == userId)  
+                              
                         select new GetMessagesResponseDto
                         {
                             Id = message.Id,
@@ -206,10 +207,12 @@ namespace GlobalSurveysApp.Data.Repo
                         };
             var query1 = from message in _context.Messages
                          join publicList in _context.PublicLists on message.Type equals publicList.Id
-                         join user in _context.Users on message.ToWhom equals user.Department
-                         where message.Type == 1037
+                         //join user in _context.Users on message.ToWhom equals user.Department
+                         from user in _context.Users 
+                         where message.Type == 1037 || message.Type == 1087
                          where message.UserId != userId
                          where user.Id == userId
+                         where message.ToWhom == user.Department || message.ToWhom == user.placeOfBirth
                          select new GetMessagesResponseDto
                          {
                              Id = message.Id,

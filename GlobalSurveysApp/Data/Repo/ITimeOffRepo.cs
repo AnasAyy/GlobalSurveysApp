@@ -36,6 +36,7 @@ namespace GlobalSurveysApp.Data.Repo
         public Task<bool> SaveChanges();
         public Task<IEnumerable<object>> testGetFilteredUsersAsync(int userId);
         public Task<List<TimeOffsForSubEmpResponceDto>> GetTimeOffsForSubEmp(int SubEmp);
+        public Task<int> GetTimeOffsCountForSubEmp(int SubEmp);
     }
 
     public class TimeOffs : ITimeOffRepo
@@ -311,15 +312,28 @@ namespace GlobalSurveysApp.Data.Repo
             orderby timeOff.Id descending
             select new TimeOffsForSubEmpResponceDto
             {
-                 Id = timeOff.Id,
-                 Name = user.FirstName + " " + user.LastName,
-                 From = timeOff.From,
-                 Type = timeOff.Type,
-                 Number = timeOff.Number
+                Id = timeOff.Id,
+                Name = user.FirstName + " " + user.LastName,
+                From = timeOff.From,
+                Type = timeOff.Type,
+                Number = timeOff.Number
             }
             ).ToListAsync();
 
             return timeoffs;
+
+        }
+
+
+        public async Task<int> GetTimeOffsCountForSubEmp(int SubEmp)
+        {
+            var timeOffsCount = await (
+            from timeOff in _context.TimeOffs
+            where timeOff.SubEmpStatus == RequestStatus.Pending && timeOff.SubstituteEmployeeId == SubEmp
+            select timeOff
+            ).CountAsync();
+
+            return timeOffsCount;
 
         }
 
