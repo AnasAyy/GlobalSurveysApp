@@ -190,6 +190,7 @@ namespace GlobalSurveysApp.Data.Repo
                         where ap.UserId == id
                         where ap.RequestType == 2
                         where ap.CanViewed == true
+                        orderby t.Id descending
                         select new GetTimeOffForApproverResponseDto
                         {
                             Id = t.Id,

@@ -144,7 +144,7 @@ namespace GlobalSurveysApp.Controllers.PublicListManagement
             return NotFound();
         }
 
-        [Authorize(Roles = "Manager, Direct responsible, HR, Secretary, Normal user, Admin"), HttpGet("GetPhoneNumber")]
+        [AllowAnonymous, HttpGet("GetPhoneNumber")]
         public async Task<IActionResult> GetPhoneNumber()
         {
             var result = await _publicList.GetPhoneNumber();

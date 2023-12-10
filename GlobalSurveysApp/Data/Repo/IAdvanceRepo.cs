@@ -183,6 +183,7 @@ namespace GlobalSurveysApp.Data.Repo
                         where ap.UserId == id
                         where ap.RequestType == 1
                         where ap.CanViewed == true
+                        orderby a.Id descending
                         select new GetAdvanceForApproverResponseDto
                         {
                             Id = a.Id,
