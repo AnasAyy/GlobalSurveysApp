@@ -32,6 +32,16 @@ namespace GlobalSurveysApp.Controllers.AdvanceManagement
         [Authorize(Roles = "Normal user, Direct responsible, HR, Secretary"), HttpPost("AddAdvance")]
         public async Task<ActionResult<object>> AddAdvance(AddAdvanceRequestDto request)
         {
+            return BadRequest(new ErrorDto
+            {
+                Code = 400,
+                MessageAr = "تم ايقاف السلف من قبل الادارة العامة",
+                MessageEn = "The advances were temporarily suspended by the general administration",
+            }) ;
+
+            
+
+
             #region Check Token Data
             var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
             if (userId == null)
