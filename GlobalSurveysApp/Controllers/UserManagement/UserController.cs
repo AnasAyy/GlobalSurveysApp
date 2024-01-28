@@ -95,7 +95,7 @@ namespace GlobalSurveysApp.Controllers.UserManagement
             #endregion
             user.Password = encryptedPassword;
             user.IdCard = await _imageConvert.ConvertToByte(request.IdCard);
-            _userRepo.Create(user);
+            _userRepo.Create(user, request.WorkingDays);
             if (!_userRepo.SaveChanges())
             {
                 return BadRequest(new ErrorDto
@@ -248,6 +248,18 @@ namespace GlobalSurveysApp.Controllers.UserManagement
                     });
             }
 
+           if (result.SerialNumber != request.SerialNumber)
+            {
+                if (_userRepo.SerialNumberIsExits(request.SerialNumber))
+                    return new JsonResult(new
+                    {
+                        errors = new
+                        {
+
+                            SerialNumber = new[] { "SerialNumber is exits" },
+                        }
+                    });
+            }
 
             result.FirstName = request.FirstName;
             result.SecondName = request.SecondName;
@@ -258,6 +270,9 @@ namespace GlobalSurveysApp.Controllers.UserManagement
             result.WorkMobile = request.WorkMobile;
             result.RoleId = request.RoleId;
             result.PassportNumber = request.PassportNumber;
+            result.LocationId = request.LocationId;
+            result.WorkingHourId = request.WorkingHourId;
+            result.SerialNumber = request.SerialNumber;
             if (request.Password != null)
             {
                 var Password = _encrypt.EncryptPassword(request.Password);
@@ -303,7 +318,7 @@ namespace GlobalSurveysApp.Controllers.UserManagement
                 #endregion
                 result.IdCard = await _imageConvert.ConvertToByte(request.IdCard);
             }
-            _userRepo.Update(result);
+            _userRepo.Update(result,request.WorkingDays);
             if (!_userRepo.SaveChanges())
             {
                 return BadRequest(new ErrorDto
@@ -416,10 +431,6 @@ namespace GlobalSurveysApp.Controllers.UserManagement
 
             return Ok(type);
         }
-
-
-
-
     }
 }
 

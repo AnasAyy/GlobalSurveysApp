@@ -74,11 +74,25 @@ namespace GlobalSurveysApp.Models
         public int RoleId { get; set; }
 
         public ICollection<Advance> Advances { get; set; } = null!;
+        public ICollection<Attendenc> Attendecs { get; set; } = null!;
         public ICollection<Complaint> Complaints { get; set; } = null!;
         public ICollection<Message> Messages { get; set; } = null!; 
         public ICollection<Approver> Approvers { get; set; } = null!;
         public ICollection<FCMtoken> FCMtokens { get; set; } = null!;
-        
 
-    }
+
+
+        public string? SerialNumber { get; set; }
+
+        [ForeignKey("LocationId")]
+        public int? LocationId { get; set; }
+
+
+        
+        [ForeignKey("WorkingHourId")]
+        public int? WorkingHourId { get; set; }
+
+        
+            
+            }
 }

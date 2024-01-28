@@ -73,6 +73,12 @@ namespace GlobalSurveysApp.Dtos.UserManagmentDtos.UserDtos
         public DateTime CreatedAt { get; set; }
         public DateTime? LastUpdatedAt { get; set; }
         public DateTime? LastLogIn { get; set; }
+
+        
+        public int? LocationId { get; set; }
+        public int? WorkingHourId { get; set; }
+
+        public List<int>? WorkingDayIds { get; set; }
     }
 
     

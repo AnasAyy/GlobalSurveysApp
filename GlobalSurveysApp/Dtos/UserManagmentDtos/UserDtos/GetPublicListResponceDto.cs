@@ -10,6 +10,7 @@
         public List<Publics> Nationality { get; set; } = null!;
         public List<Publics> Department { get; set; } = null!;
         public List<Publics> Location { get; set; } = null!;
+
     }
     public class Publics
     {

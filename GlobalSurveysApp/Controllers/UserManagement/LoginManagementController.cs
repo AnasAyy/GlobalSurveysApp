@@ -21,17 +21,19 @@ namespace GlobalSurveysApp.Controllers.UserManagement
     {
         private readonly IConfiguration _configuration;
         private readonly IEncryptRepo _encryptRepo;
+        private readonly IUserRepo _userRepo1;
         private readonly ILoginRepo _userRepo;
         private readonly IMapper _mapper;
         private readonly IRoleRepo _role;
 
-        public LoginManagementController(IConfiguration configuration, IEncryptRepo encryptRepo, ILoginRepo userRepo,IRoleRepo roleRepo, IMapper mapper)
+        public LoginManagementController(IConfiguration configuration, IEncryptRepo encryptRepo, ILoginRepo userRepo,IRoleRepo roleRepo, IMapper mapper, IUserRepo userRepo1)
         {
             _configuration = configuration;
             _encryptRepo = encryptRepo;
             _userRepo = userRepo;
             _mapper = mapper;
             _role = roleRepo;
+            _userRepo1 = userRepo1;
         }
 
         [AllowAnonymous, HttpGet("test")]
@@ -326,8 +328,24 @@ namespace GlobalSurveysApp.Controllers.UserManagement
             }
             #endregion
 
-            #region Update Password  
+            #region Check Serial Number
+            if (result.SerialNumber != request.SerialNumber)
+            {
+                if (_userRepo1.SerialNumberIsExits(request.SerialNumber))
+                    return new JsonResult(new
+                    {
+                        errors = new
+                        {
+
+                            SerialNumber = new[] { "SerialNumber is exits" },
+                        }
+                    });
+            }
+            #endregion
+
+            #region Update  
             result.Password = encryptedPassword;
+            result.SerialNumber = request.SerialNumber;
             result.IsVerified = true;
             _userRepo.Update(result);
             if (!_userRepo.SaveChanges())

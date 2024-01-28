@@ -50,6 +50,7 @@ builder.Services.AddScoped<ITimeOffRepo, TimeOffs>();
 builder.Services.AddScoped<IComplaintRepo, ComplaintRepo>();
 builder.Services.AddScoped<IMessageRepo, Messages>();
 builder.Services.AddScoped<IHistoryRepo, History>();
+builder.Services.AddScoped<IAttendanceRepo, AttendanceRepo>();
 
 
 

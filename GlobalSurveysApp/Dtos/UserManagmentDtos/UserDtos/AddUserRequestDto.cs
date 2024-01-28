@@ -104,6 +104,17 @@ namespace GlobalSurveysApp.Dtos.UserManagmentDtos.UserRequest
         [Required(ErrorMessage = "Role is required")]
         [RegularExpression(@"^\d+$", ErrorMessage = "Invalid input")]
         public int RoleId { get; set; }
+        
+        [Required(ErrorMessage = "Location Id is required")]
+        [RegularExpression(@"^\d+$", ErrorMessage = "Invalid input")]
+        public int LocationId { get; set; }
+        
+        [Required(ErrorMessage = "Working Hour Id is required")]
+        [RegularExpression(@"^\d+$", ErrorMessage = "Invalid input")]
+        public int WorkingHourId { get; set; }
+
+        [Required(ErrorMessage = "Working Days is required")]
+        public List<int> WorkingDays { get; set; } = null!;
 
 
     }

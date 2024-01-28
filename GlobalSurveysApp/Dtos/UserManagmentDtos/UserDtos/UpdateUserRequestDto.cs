@@ -94,6 +94,19 @@ namespace GlobalSurveysApp.Dtos.UserManagmentDtos.UserDtos
         [RegularExpression(@"^\d+$", ErrorMessage = "Invalid input")]
         public int RoleId { get; set; }
 
+       
+        [RegularExpression(@"^\d+$", ErrorMessage = "Invalid input")]
+        public int LocationId { get; set; }
+
+       
+        [RegularExpression(@"^\d+$", ErrorMessage = "Invalid input")]
+        public int WorkingHourId { get; set; }
+
         
+        public List<int> WorkingDays { get; set; } = null!;
+
+        
+        public string SerialNumber { get; set; } = null!;
+
     }
 }

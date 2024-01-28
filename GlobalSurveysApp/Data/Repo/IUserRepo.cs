@@ -7,8 +7,8 @@ namespace GlobalSurveysApp.Data.Repo
 {
     public interface IUserRepo
     {
-        public void Create(User user);
-        public void Update(User user);
+        public void Create(User user, List<int> DayId);
+        public void Update(User user, List<int> DayId);
         public User? GetUserById(int id);
         public  Task<User?> GetUserByIdAsync(int id);
         
@@ -19,10 +19,11 @@ namespace GlobalSurveysApp.Data.Repo
         public IQueryable<GetAllUSersResponseDto> GetAllUsers();
         public bool IsExits(string privateMobalie);
         public bool EmailIsExits(string email);
-        public IQueryable<ViewUserResponceDto> GetUserDetails(int id);
+        public ViewUserResponceDto? GetUserDetails(int id);
         public GetPublicListResponceDto GetPublicList();
         public Task<List<Role>> GetRole();
         public IQueryable<GetDirectResponsibleResponseDto> GetDirectResponsible();
+        public bool SerialNumberIsExits(string serialNumber);
 
         public bool SaveChanges();
     }
@@ -36,9 +37,20 @@ namespace GlobalSurveysApp.Data.Repo
             _context = context;
         }
 
-        public void Create(User user)
+        public void Create(User user, List<int> DayId)
         {
             _context.Users.Add(user);
+            SaveChanges();
+            foreach (var dayId in DayId)
+            {
+                var day = new User_WorkingDay
+                {
+                    UserId = user.Id,
+                    WorkingDayId = dayId
+                };
+
+                _context.User_WorkingDays.Add(day);
+            }
         }
 
 
@@ -54,7 +66,6 @@ namespace GlobalSurveysApp.Data.Repo
                        IsActive = u.IsActive,
                    };
         }
-
 
         public GetPublicListResponceDto GetPublicList()
         {
@@ -120,41 +131,56 @@ namespace GlobalSurveysApp.Data.Repo
 
 
 
-        public IQueryable<ViewUserResponceDto> GetUserDetails(int id)
+        public ViewUserResponceDto? GetUserDetails(int id)
         {
-            var query = from u in _context.Users
-                        join r in _context.Roles on u.RoleId equals r.Id
-                        where u.Id == id
-                        select new ViewUserResponceDto
-                        {
-                            Id = u.Id,
-                            FirstName = u.FirstName,
-                            SecondName = u.SecondName,
-                            ThirdName = u.ThirdName,
-                            LastName = u.LastName,
-                            WorkMobile = u.WorkMobile,
-                            PrivateMobile = u.PrivateMobile,
-                            PlaceOfBirth = u.placeOfBirth,
-                            DateOfBirth = u.DateOfBirth,
-                            CertificateLevel = u.CertificateLevel,
-                            FieldOfStudy = u.FieldOfStudy,
-                            PassportNumber = u.PassportNumber,
-                            Gender = u.Gender,
-                            FirstContractDate = u.FirstContractDate,
-                            Position = u.Postion,
-                            Nationality = u.Nationality,
-                            Email = u.Email,
-                            Department = u.Department,
-                            Location = u.Location,
-                            DirectResponsibleId = u.DirectResponsibleId,
-                            Status = u.IsActive,
-                            Role = r.Title,
-                            CreatedAt = u.CreatedAt,
-                            LastUpdatedAt = u.UpdatedAt,
-                            LastLogIn = u.LastLogin,
-                        };
+            var userQuery = from u in _context.Users
+                            join r in _context.Roles on u.RoleId equals r.Id
+                            where u.Id == id
+                            select new ViewUserResponceDto
+                            {
+                                Id = u.Id,
+                                FirstName = u.FirstName,
+                                SecondName = u.SecondName,
+                                ThirdName = u.ThirdName,
+                                LastName = u.LastName,
+                                WorkMobile = u.WorkMobile,
+                                PrivateMobile = u.PrivateMobile,
+                                PlaceOfBirth = u.placeOfBirth,
+                                DateOfBirth = u.DateOfBirth,
+                                CertificateLevel = u.CertificateLevel,
+                                FieldOfStudy = u.FieldOfStudy,
+                                PassportNumber = u.PassportNumber,
+                                Gender = u.Gender,
+                                FirstContractDate = u.FirstContractDate,
+                                Position = u.Postion,
+                                Nationality = u.Nationality,
+                                Email = u.Email,
+                                Department = u.Department,
+                                Location = u.Location,
+                                DirectResponsibleId = u.DirectResponsibleId,
+                                Status = u.IsActive,
+                                Role = r.Title,
+                                CreatedAt = u.CreatedAt,
+                                LastUpdatedAt = u.UpdatedAt,
+                                LastLogIn = u.LastLogin,
+                                LocationId = u.LocationId,
+                                WorkingHourId = u.WorkingHourId
+                            };
 
-            return query;
+            var workingDaysQuery = _context.User_WorkingDays
+                                        .Where(w => w.UserId == id)
+                                        .Select(w => w.WorkingDayId)
+                                        .ToList();
+
+            var userDetails = userQuery.FirstOrDefault(); // Get the user details
+
+            // Assign the working days to the user details
+            if (userDetails != null)
+            {
+                userDetails.WorkingDayIds = workingDaysQuery;
+            }
+
+            return userDetails;
         }
 
 
@@ -164,10 +190,14 @@ namespace GlobalSurveysApp.Data.Repo
         {
             return _context.Users.Any(x => x.PrivateMobile == privateMobalie);
         }
-        
+
         public bool EmailIsExits(string email)
         {
             return _context.Users.Any(x => x.Email == email);
+        }
+        public bool SerialNumberIsExits(string serialNumber)
+        {
+            return _context.Users.Any(x => x.SerialNumber == serialNumber);
         }
 
         public bool SaveChanges()
@@ -184,10 +214,27 @@ namespace GlobalSurveysApp.Data.Repo
             return false;
         }
 
-        public void Update(User user)
+        public void Update(User user , List<int> DayId)
         {
 
+            // Delete the previous working days associated with the user
+            var previousDays = _context.User_WorkingDays.Where(d => d.UserId == user.Id);
+            _context.User_WorkingDays.RemoveRange(previousDays);
+
+            // Update the user
             _context.Users.Update(user);
+
+            // Add the new working days
+            foreach (var dayId in DayId)
+            {
+                var day = new User_WorkingDay
+                {
+                    UserId = user.Id,
+                    WorkingDayId = dayId
+                };
+
+                _context.User_WorkingDays.Add(day);
+            }
         }
 
         public IQueryable<GetDirectResponsibleResponseDto> GetDirectResponsible()

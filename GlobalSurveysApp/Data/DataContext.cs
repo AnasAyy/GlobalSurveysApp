@@ -17,12 +17,20 @@ namespace GlobalSurveysApp.Data
         public DbSet<Role> Roles { get; set; } = null!;
         public DbSet<PublicList> PublicLists { get; set; } = null!;
         public DbSet<Advance> Advances { get; set; } = null!;
+        public DbSet<Attendenc> Attendencs { get; set; } = null!;
         public DbSet<TimeOff> TimeOffs { get; set; } = null!;
         public DbSet<Complaint> Complaints { get; set; } = null!;
         public DbSet<Message> Messages { get; set; } = null!;
         public DbSet<Approver> Approvers { get; set; } = null!;
         public DbSet<LogFile> LogFiles { get; set; } = null!;
         public DbSet<FCMtoken> FCMtokens { get; set; } = null!;
+        public DbSet<Location> Locations { get; set; } = null!;
+        public DbSet<User_WorkingDay> User_WorkingDays { get; set; } = null!;
+        public DbSet<WorkingDay> WorkingDays { get; set; } = null!;
+        public DbSet<WorkingHour> WorkingHours { get; set; } = null!;
+        
+        
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
