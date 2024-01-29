@@ -36,6 +36,9 @@ namespace GlobalSurveysApp.Data.Repo
 
         public Task<bool> IsExits(int userId, DateTime date);
         public Task<bool> CheckSerialNumber(int userId, string serialNumber);
+
+        public Task<Attendenc> GetAttendance(int userId, DateTime date);
+        public void UpdateAttendance(Attendenc attendenc);
     }
 
     public class AttendanceRepo : IAttendanceRepo
@@ -222,6 +225,10 @@ namespace GlobalSurveysApp.Data.Repo
         {
             await _context.Attendencs.AddAsync(attendenc);
         }
+        public void UpdateAttendance(Attendenc attendenc)
+        {
+             _context.Attendencs.Update(attendenc);
+        }
 
         public async Task<bool> IsExits(int userId, DateTime date)
         {
@@ -234,6 +241,16 @@ namespace GlobalSurveysApp.Data.Repo
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
             return user?.SerialNumber == serialNumber;
+        }
+
+        public async Task<Attendenc> GetAttendance(int userId, DateTime date)
+        {
+            var attendance = await _context.Attendencs.FirstOrDefaultAsync(x => x.UserId == userId && x.Date.Date == date.Date);
+            if (attendance == null)
+            {
+                throw new Exception("Attendance not found.");
+            }
+            return attendance;
         }
 
         #endregion

@@ -80,7 +80,7 @@ namespace GlobalSurveysApp.Controllers.AttendanceManagement
                 
                 var attendance = new Attendenc()
                 {
-                    CheckIn= TimeSpan.Parse(request.Time),
+                    CheckIn= yemenDate.TimeOfDay,
                     UserId =Convert.ToInt32(userId.Value),
                     Date= yemenDate,
                     
@@ -106,6 +106,88 @@ namespace GlobalSurveysApp.Controllers.AttendanceManagement
             {
                 Code = 400,
                 MessageAr = "عذراً، تم رفض طلب الحضور أنت خارج نطاق الحضور.",
+                MessageEn = "Sorry, Attendance request rejected. You are outside the attendance range.",
+            });
+        }
+
+
+        [Authorize, HttpPut("CheckOut")]
+        public async Task<IActionResult> CheckOut(CheckRequestDto request)
+        {
+            var yemenTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Aden");
+            var yemenDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, yemenTimeZone);
+
+            #region Check Token Data
+            var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            #endregion
+
+            #region Check user location
+            var result = await _attendence.GetUserLocation(Convert.ToInt32(userId.Value));
+            if (result == null)
+            {
+                return BadRequest(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+                    MessageEn = "Oops, something went wrong. Please try again.",
+                });
+
+            }
+
+            if (!await _attendence.CheckSerialNumber(Convert.ToInt32(userId.Value), request.SerialNumber))
+            {
+                return BadRequest(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "عذراً،الرجاء التحقق من استخدام هاتفك.",
+                    MessageEn = "Sorry, please verify the use of your phone.",
+                });
+            }
+            #endregion
+
+            #region Check Attendence
+            var attendance = await _attendence.GetAttendance(Convert.ToInt32(userId.Value), yemenDate);
+            if (attendance == null) return new JsonResult(new
+            {
+                errors = new
+                {
+
+                    Attendance = new[] { "لم تقم بتسجل الحضور بعد.!" }
+                }
+            });
+            #endregion
+
+            #region Check distance
+            var distance = CalculateDistance(request.DesignatedLat, request.DesignatedLon, result.Latitude, result.Longitude);
+
+            if (distance <= AttendanceRadiusInKm)
+            {
+
+
+                attendance.CheckOut = yemenDate.TimeOfDay;
+                _attendence.UpdateAttendance(attendance);
+                if (!await _attendence.SaveChangesAsync())
+                {
+                    return BadRequest(new ErrorDto
+                    {
+                        Code = 400,
+                        MessageAr = "عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+                        MessageEn = "Oops, something went wrong. Please try again.",
+                    });
+                }
+
+                return Ok();
+            }
+            #endregion
+
+            return BadRequest(new ErrorDto
+            {
+                Code = 400,
+                MessageAr = "عذراً، تم رفض طلب الانصراف أنت خارج نطاق الحضور.",
                 MessageEn = "Sorry, Attendance request rejected. You are outside the attendance range.",
             });
         }
