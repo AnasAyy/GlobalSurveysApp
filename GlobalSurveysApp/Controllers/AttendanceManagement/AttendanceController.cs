@@ -212,6 +212,16 @@ namespace GlobalSurveysApp.Controllers.AttendanceManagement
             return degrees * (Math.PI / 180);
         }
 
-       
+
+
+        #region Reports
+        [HttpGet]
+        public async Task<IActionResult> getdates(int id, DateTime from , DateTime to)
+        {
+            var x = await _attendence.GetAttendanceRecords( id,  from,  to);
+            return Ok( x);
+        }
+        #endregion
+
     }
 }

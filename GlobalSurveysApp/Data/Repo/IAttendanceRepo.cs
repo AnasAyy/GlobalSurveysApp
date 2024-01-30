@@ -25,10 +25,10 @@ namespace GlobalSurveysApp.Data.Repo
 
         public Task CreateWorkingDay(WorkingDay workingDay);
         public void UpdateWorkingDay(WorkingDay workingDay);
-        public  Task<bool> GetWorkingDayForAdd(AddWorkingDayRequestDto addWorkingDayRequestDto);
-        public  Task<bool> GetWorkingDayByParForUpdate(UpdateWorkingDayRequestDto updateWorkingDayRequestDto);
-        public  Task<WorkingDay?> GetWorkingDayDyId(int Id);
-        public  Task<IQueryable<GetAllWorkingDayResponseDto>> GetAllWorkingDays();
+        public Task<bool> GetWorkingDayForAdd(AddWorkingDayRequestDto addWorkingDayRequestDto);
+        public Task<bool> GetWorkingDayByParForUpdate(UpdateWorkingDayRequestDto updateWorkingDayRequestDto);
+        public Task<WorkingDay?> GetWorkingDayDyId(int Id);
+        public Task<IQueryable<GetAllWorkingDayResponseDto>> GetAllWorkingDays();
 
 
         public Task<Location?> GetUserLocation(int userId);
@@ -39,6 +39,8 @@ namespace GlobalSurveysApp.Data.Repo
 
         public Task<Attendenc> GetAttendance(int userId, DateTime date);
         public void UpdateAttendance(Attendenc attendenc);
+
+        public Task<List<AttendanceRecordResponceDto>> GetAttendanceRecords(int userId, DateTime from, DateTime to);
     }
 
     public class AttendanceRepo : IAttendanceRepo
@@ -84,8 +86,8 @@ namespace GlobalSurveysApp.Data.Repo
 
         public async Task<WorkingHour?> GetWorkingHourDyId(int Id)
         {
-            var x= await _context.WorkingHours.FirstOrDefaultAsync(x => x.Id ==Id);
-             
+            var x = await _context.WorkingHours.FirstOrDefaultAsync(x => x.Id == Id);
+
             _context.ChangeTracker.Clear();
             return x;
         }
@@ -227,12 +229,12 @@ namespace GlobalSurveysApp.Data.Repo
         }
         public void UpdateAttendance(Attendenc attendenc)
         {
-             _context.Attendencs.Update(attendenc);
+            _context.Attendencs.Update(attendenc);
         }
 
         public async Task<bool> IsExits(int userId, DateTime date)
         {
-            return await _context.Attendencs.AnyAsync(x => x.UserId == userId  && x.Date == date);
+            return await _context.Attendencs.AnyAsync(x => x.UserId == userId && x.Date == date);
         }
 
 
@@ -252,6 +254,111 @@ namespace GlobalSurveysApp.Data.Repo
             }
             return attendance;
         }
+
+
+
+
+        public async Task<List<AttendanceRecordResponceDto>> GetAttendanceRecords(int userId, DateTime from, DateTime to)
+        {
+            var workingDayIds = await _context.User_WorkingDays
+                .Where(x => x.UserId == userId)
+                .Select(x => x.WorkingDayId)
+                .ToListAsync();
+
+            var workingDaysNames = new HashSet<string>(await _context.WorkingDays
+                .Where(wd => workingDayIds.Contains(wd.Id))
+                .Select(wd => wd.NameEn)
+                .ToListAsync());
+
+            var WorkingHourId = await _context.Users
+            .Where(x => x.Id == userId)
+            .Select(x => x.WorkingHourId)
+            .FirstOrDefaultAsync();
+
+            var workingHours = await _context.WorkingHours
+                .Where(x => x.Id == WorkingHourId)
+                .Select(x => x.Start)
+                .FirstOrDefaultAsync();
+
+
+            var matchingDates = new List<DateTime>();
+
+            for (DateTime date = from.Date; date.Date <= to.Date; date = date.AddDays(1))
+            {
+                if (workingDaysNames.Contains(date.DayOfWeek.ToString()))
+                {
+                    matchingDates.Add(date.Date);
+                }
+            }
+
+            var attendanceRecords = new Dictionary<DateTime, AttendanceRecordResponceDto>();
+
+            var attendances = await _context.Attendencs
+    .Where(x => x.UserId == userId && x.Date.Date >= from.Date && x.Date.Date <= to.Date)
+    .ToListAsync();
+
+            var timeOffs = await _context.TimeOffs
+                .Where(x => x.UserId == userId && x.CreatedAt.Date >= from.Date && x.CreatedAt.Date <= to.Date)
+                .ToListAsync();
+
+            var holidays = await _context.PublicLists
+     .Where(x => x.Type == 1092)
+     .ToListAsync();
+
+            var filteredHolidays = holidays
+                .Where(x => Convert.ToDateTime(x.NameEN).Date >= from.Date && Convert.ToDateTime(x.NameEN).Date <= to.Date)
+                .ToList();
+
+
+            foreach (var date in matchingDates)
+            {
+                var attendanceRecord = new AttendanceRecordResponceDto
+                {
+                    Date = date.Date,
+                    Status = "Absent", // Default status is Absent
+                    CheckInTime = null,
+                    CheckOutTime = null,
+                    Daley=null,
+                };
+
+                var attendance = attendances.FirstOrDefault(x => x.Date.Date == date.Date);
+                if (attendance != null)
+                {
+                    attendanceRecord.Status = "Present";
+                    attendanceRecord.CheckInTime = attendance.CheckIn;
+                    attendanceRecord.CheckOutTime = attendance.CheckOut;
+                    if (workingHours != null)
+                    {
+                        TimeSpan s = TimeSpan.Parse(workingHours);
+                        TimeSpan delay = attendance.CheckIn - s;
+                        if (delay < TimeSpan.Zero)
+                        {
+                            delay = TimeSpan.Zero;
+                        }
+
+                        attendanceRecord.Daley = delay;
+                    }
+                    
+                }
+
+                var timeOff = timeOffs.FirstOrDefault(x => x.CreatedAt.Date == date.Date);
+                if (timeOff != null)
+                {
+                    attendanceRecord.Status = "Time Off";
+                }
+
+                var holiday = holidays.FirstOrDefault(x => Convert.ToDateTime(x.NameEN).Date >= from.Date && Convert.ToDateTime(x.NameEN).Date <= to.Date);
+                if (holiday != null)
+                {
+                    attendanceRecord.Status = "Holiday";
+                }
+
+                attendanceRecords.Add(date, attendanceRecord);
+            }
+
+            return attendanceRecords.Values.ToList();
+        }
+
 
         #endregion
     }
