@@ -1,4 +1,5 @@
-﻿using GlobalSurveysApp.Data.Repo;
+﻿using Azure.Core;
+using GlobalSurveysApp.Data.Repo;
 using GlobalSurveysApp.Dtos;
 using GlobalSurveysApp.Dtos.AttendanceDtos.AttendanceDto;
 using GlobalSurveysApp.Models;
@@ -25,8 +26,9 @@ namespace GlobalSurveysApp.Controllers.AttendanceManagement
         [Authorize, HttpPost("CheckIn")]
         public async Task<IActionResult> CheckIn(CheckRequestDto request)
         {
-            var yemenTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Aden");
+            var yemenTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Tokyo");
             var yemenDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, yemenTimeZone);
+
 
             #region Check Token Data
             var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
@@ -38,7 +40,7 @@ namespace GlobalSurveysApp.Controllers.AttendanceManagement
 
             #region Check user location
             var result = await _attendence.GetUserLocation(Convert.ToInt32(userId.Value));
-            if(result == null)
+            if (result == null)
             {
                 return BadRequest(new ErrorDto
                 {
@@ -49,7 +51,7 @@ namespace GlobalSurveysApp.Controllers.AttendanceManagement
 
             }
 
-            if(! await _attendence.CheckSerialNumber(Convert.ToInt32(userId.Value),request.SerialNumber))
+            if (!await _attendence.CheckSerialNumber(Convert.ToInt32(userId.Value), request.SerialNumber))
             {
                 return BadRequest(new ErrorDto
                 {
@@ -80,10 +82,10 @@ namespace GlobalSurveysApp.Controllers.AttendanceManagement
                 
                 var attendance = new Attendenc()
                 {
-                    CheckIn= yemenDate.TimeOfDay,
-                    UserId =Convert.ToInt32(userId.Value),
-                    Date= yemenDate,
-                    
+                    CheckIn = TimeSpan.FromHours(yemenDate.Hour) + TimeSpan.FromMinutes(yemenDate.Minute),
+                    UserId = Convert.ToInt32(userId.Value),
+                    Date = yemenDate,
+
 
                 };
 
@@ -116,6 +118,7 @@ namespace GlobalSurveysApp.Controllers.AttendanceManagement
         {
             var yemenTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Aden");
             var yemenDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, yemenTimeZone);
+
 
             #region Check Token Data
             var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
@@ -168,7 +171,7 @@ namespace GlobalSurveysApp.Controllers.AttendanceManagement
             {
 
 
-                attendance.CheckOut = yemenDate.TimeOfDay;
+                attendance.CheckOut = TimeSpan.FromHours(yemenDate.Hour) + TimeSpan.FromMinutes(yemenDate.Minute);
                 _attendence.UpdateAttendance(attendance);
                 if (!await _attendence.SaveChangesAsync())
                 {
@@ -215,11 +218,31 @@ namespace GlobalSurveysApp.Controllers.AttendanceManagement
 
 
         #region Reports
-        [HttpGet]
-        public async Task<IActionResult> getdates(int id, DateTime from , DateTime to)
+        [Authorize, HttpGet("GetAttendanceReport")]
+        public async Task<IActionResult> GetAttendanceReport(AttendanceReportRequestDto request)
         {
-            var x = await _attendence.GetAttendanceRecords( id,  from,  to);
-            return Ok( x);
+            #region Check Token Data
+            var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            DateTime fromDateTime = DateTime.Parse("2024/1/1");
+            if (request.From < fromDateTime)
+            {
+                return BadRequest(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "عذراً، الرجاء تحديد التاريخ بدقه.",
+                    MessageEn = "Sorry, please specify the date accurately.",
+                });
+
+            }
+
+            #endregion
+            var x = await _attendence.GetAttendanceRecords(Convert.ToInt32(userId.Value), request.From, request.To);
+            return Ok(x);
         }
         #endregion
 

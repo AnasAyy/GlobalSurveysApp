@@ -234,7 +234,7 @@ namespace GlobalSurveysApp.Data.Repo
 
         public async Task<bool> IsExits(int userId, DateTime date)
         {
-            return await _context.Attendencs.AnyAsync(x => x.UserId == userId && x.Date == date);
+            return await _context.Attendencs.AnyAsync(x => x.UserId == userId && x.Date.Date == date.Date);
         }
 
 
