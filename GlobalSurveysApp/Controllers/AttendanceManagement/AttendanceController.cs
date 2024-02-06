@@ -79,7 +79,7 @@ namespace GlobalSurveysApp.Controllers.AttendanceManagement
 
             if (distance <= AttendanceRadiusInKm)
             {
-                
+
                 var attendance = new Attendenc()
                 {
                     CheckIn = TimeSpan.FromHours(yemenDate.Hour) + TimeSpan.FromMinutes(yemenDate.Minute),
@@ -218,8 +218,22 @@ namespace GlobalSurveysApp.Controllers.AttendanceManagement
 
 
         #region Reports
-        [Authorize, HttpGet("GetAttendanceReport")]
-        public async Task<IActionResult> GetAttendanceReport(AttendanceReportRequestDto request)
+        [HttpGet("GetAttendanceReportForUser")]
+        public async Task<IActionResult> GetAttendanceReportForUser()
+        {
+            #region Check Token Data
+            var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            #endregion
+            var x = await _attendence.GetAttendanceRecords(Convert.ToInt32(userId.Value));
+            return Ok(x);
+        }
+
+        [Authorize, HttpGet("GetAttendanceReportForUserByDate")]
+        public async Task<IActionResult> GetAttendanceReportForUserByDate(AttendanceReportRequestDto request)
         {
             #region Check Token Data
             var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
@@ -242,6 +256,117 @@ namespace GlobalSurveysApp.Controllers.AttendanceManagement
 
             #endregion
             var x = await _attendence.GetAttendanceRecords(Convert.ToInt32(userId.Value), request.From, request.To);
+            return Ok(x);
+        }
+
+        [Authorize, HttpGet("GetAllAttendanceReportSummeryForUser")]
+        public async Task<IActionResult> GetAllAttendanceReportSummeryForUser(AttendanceReportRequestDto request)
+        {
+
+            #region Check Token Data
+            var userId = HttpContext.User.FindFirst(ClaimTypes.Name);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+            #endregion
+
+            DateTime fromDateTime = DateTime.Parse("2024/1/1");
+            if (request.From < fromDateTime)
+            {
+                return BadRequest(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "عذراً، الرجاء تحديد التاريخ بدقه.",
+                    MessageEn = "Sorry, please specify the date accurately.",
+                });
+
+            }
+
+            var x = await _attendence.GetAttendanceSummary(Convert.ToInt32(userId.Value), request.From, request.To);
+            return Ok(x);
+        }
+
+
+
+
+
+        [Authorize(Roles = "Manager, HR"), HttpGet("GetAllAttendanceReport")]
+        public async Task<IActionResult> GetAllAttendanceReport(AttendanceReportRequestDto request)
+        {
+            DateTime fromDateTime = DateTime.Parse("2024/1/1");
+            if (request.From < fromDateTime)
+            {
+                return BadRequest(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "عذراً، الرجاء تحديد التاريخ بدقه.",
+                    MessageEn = "Sorry, please specify the date accurately.",
+                });
+
+            }
+
+           
+            var x = await _attendence.GetOverallAttendanceReport(request.From, request.To);
+            return Ok(x);
+        }
+
+
+
+
+
+        [Authorize(Roles = "Manager, HR"), HttpGet("GetAllUsers")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var result = await _attendence.GetAllUsers();
+            if(result == null)
+            {
+                return Ok(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "لا يوجد بيانات.",
+                    MessageEn = "There are no data.",
+                });
+            }
+            return Ok(result);
+        }
+
+
+        [Authorize(Roles = "Manager, HR"), HttpGet("GetAllAttendanceReportForManagement")]
+        public async Task<IActionResult> GetAllAttendanceReportForManagement(AttendanceReportForManagementDto request)
+        {
+            DateTime fromDateTime = DateTime.Parse("2024/1/1");
+            if (request.From < fromDateTime)
+            {
+                return BadRequest(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "عذراً، الرجاء تحديد التاريخ بدقه.",
+                    MessageEn = "Sorry, please specify the date accurately.",
+                });
+
+            }
+
+            var x = await _attendence.GetAttendanceRecords(Convert.ToInt32(request.Id), request.From, request.To);
+            return Ok(x);
+        }
+        
+        [Authorize(Roles = "Manager, HR"), HttpGet("GetAllAttendanceReportSummeryForManagement")]
+        public async Task<IActionResult> GetAllAttendanceReportSummeryForManagement(AttendanceReportForManagementDto request)
+        {
+            DateTime fromDateTime = DateTime.Parse("2024/1/1");
+            if (request.From < fromDateTime)
+            {
+                return BadRequest(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "عذراً، الرجاء تحديد التاريخ بدقه.",
+                    MessageEn = "Sorry, please specify the date accurately.",
+                });
+
+            }
+
+            var x = await _attendence.GetAttendanceSummary(Convert.ToInt32(request.Id), request.From, request.To);
             return Ok(x);
         }
         #endregion

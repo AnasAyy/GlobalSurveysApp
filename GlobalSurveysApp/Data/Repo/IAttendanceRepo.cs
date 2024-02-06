@@ -41,6 +41,15 @@ namespace GlobalSurveysApp.Data.Repo
         public void UpdateAttendance(Attendenc attendenc);
 
         public Task<List<AttendanceRecordResponceDto>> GetAttendanceRecords(int userId, DateTime from, DateTime to);
+
+        public Task<Dictionary<int, AttendanceSummaryDto>> GetOverallAttendanceReport(DateTime from, DateTime to);
+
+        public Task<List<GetAllUsersDto>> GetAllUsers();
+
+
+        public  Task<List<AttendanceRecordResponceDto>> GetAttendanceRecords(int userId);
+
+        public Task<AttendanceSummariesDto> GetAttendanceSummary(int userId, DateTime from, DateTime to);
     }
 
     public class AttendanceRepo : IAttendanceRepo
@@ -214,7 +223,7 @@ namespace GlobalSurveysApp.Data.Repo
         {
             var user = await _context.Users.FindAsync(userId);
 
-            if (user != null)
+            if(user != null)
             {
                 var location = await _context.Locations.FindAsync(user.LocationId);
                 return location;
@@ -318,7 +327,7 @@ namespace GlobalSurveysApp.Data.Repo
                     Status = "Absent", // Default status is Absent
                     CheckInTime = null,
                     CheckOutTime = null,
-                    Daley=null,
+                    Daley = null,
                 };
 
                 var attendance = attendances.FirstOrDefault(x => x.Date.Date == date.Date);
@@ -338,7 +347,7 @@ namespace GlobalSurveysApp.Data.Repo
 
                         attendanceRecord.Daley = delay;
                     }
-                    
+
                 }
 
                 var timeOff = timeOffs.FirstOrDefault(x => x.CreatedAt.Date == date.Date);
@@ -359,7 +368,338 @@ namespace GlobalSurveysApp.Data.Repo
             return attendanceRecords.Values.ToList();
         }
 
+        public async Task<List<AttendanceRecordResponceDto>> GetAttendanceRecords(int userId)
+        {
+            var currentDate = DateTime.Now;
+            var firstDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+            var lastDayOfMonth = currentDate;
 
+            var workingDayIds = await _context.User_WorkingDays
+                .Where(x => x.UserId == userId)
+                .Select(x => x.WorkingDayId)
+                .ToListAsync();
+
+            var workingDaysNames = new HashSet<string>(await _context.WorkingDays
+                .Where(wd => workingDayIds.Contains(wd.Id))
+                .Select(wd => wd.NameEn)
+                .ToListAsync());
+
+            var WorkingHourId = await _context.Users
+                .Where(x => x.Id == userId)
+                .Select(x => x.WorkingHourId)
+                .FirstOrDefaultAsync();
+
+            var workingHours = await _context.WorkingHours
+                .Where(x => x.Id == WorkingHourId)
+                .Select(x => x.Start)
+                .FirstOrDefaultAsync();
+
+            var matchingDates = new List<DateTime>();
+            for (DateTime date = firstDayOfMonth.Date; date.Date <= lastDayOfMonth.Date; date = date.AddDays(1))
+            {
+                if (workingDaysNames.Contains(date.DayOfWeek.ToString()))
+                {
+                    matchingDates.Add(date.Date);
+                }
+            }
+
+            var attendanceRecords = new Dictionary<DateTime, AttendanceRecordResponceDto>();
+
+            var attendances = await _context.Attendencs
+                .Where(x => x.UserId == userId && x.Date.Date >= firstDayOfMonth.Date && x.Date.Date <= lastDayOfMonth.Date)
+                .ToListAsync();
+
+            var timeOffs = await _context.TimeOffs
+                .Where(x => x.UserId == userId && x.CreatedAt.Date >= firstDayOfMonth.Date && x.CreatedAt.Date <= lastDayOfMonth.Date)
+                .ToListAsync();
+
+            var holidays = await _context.PublicLists
+                .Where(x => x.Type == 1092)
+                .ToListAsync();
+
+            var filteredHolidays = holidays
+                .Where(x => Convert.ToDateTime(x.NameEN).Date >= firstDayOfMonth.Date && Convert.ToDateTime(x.NameEN).Date <= lastDayOfMonth.Date)
+                .ToList();
+
+            foreach (var date in matchingDates)
+            {
+                var attendanceRecord = new AttendanceRecordResponceDto
+                {
+                    Date = date.Date,
+                    Status = "Absent", // Default status is Absent
+                    CheckInTime = null,
+                    CheckOutTime = null,
+                    Daley = null,
+                };
+
+                var attendance = attendances.FirstOrDefault(x => x.Date.Date == date.Date);
+                if (attendance != null)
+                {
+                    attendanceRecord.Status = "Present";
+                    attendanceRecord.CheckInTime = attendance.CheckIn;
+                    attendanceRecord.CheckOutTime = attendance.CheckOut;
+                    if (workingHours != null)
+                    {
+                        TimeSpan s = TimeSpan.Parse(workingHours);
+                        TimeSpan delay = attendance.CheckIn - s;
+                        if (delay < TimeSpan.Zero)
+                        {
+                            delay = TimeSpan.Zero;
+                        }
+
+                        attendanceRecord.Daley = delay;
+                    }
+                }
+
+                var timeOff = timeOffs.FirstOrDefault(x => x.CreatedAt.Date == date.Date);
+                if (timeOff != null)
+                {
+                    attendanceRecord.Status = "Time Off";
+                }
+
+                var holiday = holidays.FirstOrDefault(x => Convert.ToDateTime(x.NameEN).Date >= firstDayOfMonth.Date && Convert.ToDateTime(x.NameEN).Date <= lastDayOfMonth.Date);
+                if (holiday != null)
+                {
+                    attendanceRecord.Status = "Holiday";
+                }
+
+                attendanceRecords.Add(date, attendanceRecord);
+            }
+
+            return attendanceRecords.Values.ToList();
+        }
+
+        public async Task<Dictionary<int, AttendanceSummaryDto>> GetOverallAttendanceReport(DateTime from, DateTime to)
+        {
+            var users = await _context.Users
+            .Select(x => new {x.Id, x.FirstName, x.LastName, x.WorkingHourId })
+            .ToListAsync();
+
+            var attendanceRecords = new Dictionary<int, AttendanceSummaryDto>();
+
+            foreach (var user in users)
+            {
+                var userId = user.Id;
+
+                var workingDayIds = await _context.User_WorkingDays
+                    .Where(x => x.UserId == userId)
+                    .Select(x => x.WorkingDayId)
+                    .ToListAsync();
+
+                var workingDaysNames = new HashSet<string>(await _context.WorkingDays
+                    .Where(wd => workingDayIds.Contains(wd.Id))
+                    .Select(wd => wd.NameEn)
+                    .ToListAsync());
+
+                var WorkingHourId = user.WorkingHourId;
+
+                var workingHours = await _context.WorkingHours
+                    .Where(x => x.Id == WorkingHourId)
+                    .Select(x => x.Start)
+                    .FirstOrDefaultAsync();
+
+                var matchingDates = new List<DateTime>();
+
+                for (DateTime date = from.Date; date.Date <= to.Date; date = date.AddDays(1))
+                {
+                    if (workingDaysNames.Contains(date.DayOfWeek.ToString()))
+                    {
+                        matchingDates.Add(date.Date);
+                    }
+                }
+
+                var attendance = await _context.Attendencs
+                    .Where(x => x.UserId == userId && x.Date.Date >= from.Date && x.Date.Date <= to.Date)
+                    .ToListAsync();
+
+                var timeOffs = await _context.TimeOffs
+                    .Where(x => x.UserId == userId && x.CreatedAt.Date >= from.Date && x.CreatedAt.Date <= to.Date)
+                    .ToListAsync();
+
+                var holidays = await _context.PublicLists
+                    .Where(x => x.Type == 1092)
+                    .ToListAsync();
+
+                var filteredHolidays = holidays
+                    .Where(x => Convert.ToDateTime(x.NameEN).Date >= from.Date && Convert.ToDateTime(x.NameEN).Date <= to.Date)
+                    .ToList();
+
+                var attendanceSummary = new AttendanceSummaryDto
+                {
+                    UserName = user.FirstName + " " + user.LastName,
+                    AbsentDays = 0,
+                    PresentDays = 0,
+                    TimeOffDays = 0,
+                    TotalDelay = TimeSpan.Zero,
+                    TotalWorkingHours = TimeSpan.Zero
+                };
+
+                foreach (var date in matchingDates)
+                {
+                    var attendanceRecord = attendance.FirstOrDefault(x => x.Date.Date == date.Date);
+                    var timeOff = timeOffs.FirstOrDefault(x => x.CreatedAt.Date == date.Date);
+                    var holiday = holidays.FirstOrDefault(x => Convert.ToDateTime(x.NameEN).Date == date.Date);
+
+                    if (attendanceRecord != null)
+                    {
+                        attendanceSummary.PresentDays++;
+                        if (workingHours != null)
+                        {
+                            TimeSpan s = TimeSpan.Parse(workingHours);
+                            TimeSpan delay = attendanceRecord.CheckIn - s;
+                            if (delay < TimeSpan.Zero)
+                            {
+                                delay = TimeSpan.Zero;
+                            }
+                            attendanceSummary.TotalDelay += delay;
+                        }
+
+                        // Calculate the working hours if both check-in and check-out exist
+                        if (attendanceRecord?.CheckIn != null && attendanceRecord?.CheckOut != null)
+                        {
+                            TimeSpan workingHoursOfDay = attendanceRecord.CheckOut - attendanceRecord.CheckIn;
+                            attendanceSummary.TotalWorkingHours += workingHoursOfDay;
+                        }
+                    }
+                    else if (timeOff != null)
+                    {
+                        attendanceSummary.TimeOffDays++;
+                    }
+                    else if (holiday != null)
+                    {
+                        attendanceSummary.AbsentDays++;
+                    }
+                    else
+                    {
+                        attendanceSummary.AbsentDays++;
+                    }
+                }
+
+                attendanceRecords.Add(userId, attendanceSummary);
+            }
+
+            return attendanceRecords;
+        }
+
+        public async Task<List<GetAllUsersDto>> GetAllUsers()
+        {
+            var usersDto = await _context.Users
+                .Select(x => new GetAllUsersDto
+                {
+                    Id = x.Id,
+                    Name = $"{x.FirstName} {x.LastName}"
+                }).ToListAsync();
+
+            return usersDto;
+        }
+
+
+        public async Task<AttendanceSummariesDto> GetAttendanceSummary(int userId, DateTime from, DateTime to)
+        {
+           
+            var workingDayIds = await _context.User_WorkingDays
+                .Where(x => x.UserId == userId)
+                .Select(x => x.WorkingDayId)
+                .ToListAsync();
+
+            var workingDaysNames = new HashSet<string>(await _context.WorkingDays
+                .Where(wd => workingDayIds.Contains(wd.Id))
+                .Select(wd => wd.NameEn)
+                .ToListAsync());
+
+            var WorkingHourId = await _context.Users
+            .Where(x => x.Id == userId)
+            .Select(x => x.WorkingHourId)
+            .FirstOrDefaultAsync();
+
+            var workingHours = await _context.WorkingHours
+                .Where(x => x.Id == WorkingHourId)
+                .Select(x => x.Start)
+                .FirstOrDefaultAsync();
+
+
+            var matchingDates = new List<DateTime>();
+
+            for (DateTime date = from.Date; date.Date <= to.Date; date = date.AddDays(1))
+            {
+                if (workingDaysNames.Contains(date.DayOfWeek.ToString()))
+                {
+                    matchingDates.Add(date.Date);
+                }
+            }
+
+            
+
+            var attendances = await _context.Attendencs
+                .Where(x => x.UserId == userId && x.Date.Date >= from.Date && x.Date.Date <= to.Date)
+                .ToListAsync();
+
+            var timeOffs = await _context.TimeOffs
+                .Where(x => x.UserId == userId && x.CreatedAt.Date >= from.Date && x.CreatedAt.Date <= to.Date)
+                .ToListAsync();
+
+            var holidays = await _context.PublicLists
+                .Where(x => x.Type == 1092)
+                .ToListAsync();
+
+            var filteredHolidays = holidays
+                .Where(x => Convert.ToDateTime(x.NameEN).Date >= from.Date && Convert.ToDateTime(x.NameEN).Date <= to.Date)
+                .ToList();
+
+                var attendanceSummery = new AttendanceSummariesDto
+                {
+                    PresentCount = 0,
+                    AbsentCount = 0,
+                    TimeOffCount = 0,
+                    WorkingHourSum = TimeSpan.Zero,
+                    DelaySum = TimeSpan.Zero,
+                    HolidayCount = 0,
+
+                };
+
+            foreach (var date in matchingDates)
+            {
+                var attendance = attendances.FirstOrDefault(x => x.Date.Date == date.Date);
+                var timeOff = timeOffs.FirstOrDefault(x => x.CreatedAt.Date == date.Date);
+                var holiday = holidays.FirstOrDefault(x => Convert.ToDateTime(x.NameEN).Date == date.Date);
+
+                if (attendance != null)
+                {
+                    attendanceSummery.PresentCount++;
+                    if (workingHours != null)
+                    {
+                        TimeSpan s = TimeSpan.Parse(workingHours);
+                        TimeSpan delay = attendance.CheckIn - s;
+                        if (delay < TimeSpan.Zero)
+                        {
+                            delay = TimeSpan.Zero;
+                        }
+                        attendanceSummery.DelaySum += delay;
+                    }
+
+                    if (attendance.CheckOut != TimeSpan.Zero && attendance.CheckIn != TimeSpan.Zero)
+                    {
+                        TimeSpan workingHour = attendance.CheckOut - attendance.CheckIn;
+                        attendanceSummery.WorkingHourSum += workingHour;
+                    }
+                }
+                else if (timeOff != null)
+                {
+                    attendanceSummery.TimeOffCount++;
+                }
+                else if (holiday != null)
+                {
+                    attendanceSummery.HolidayCount++;
+                }
+                else
+                {
+                    attendanceSummery.AbsentCount++;
+                    attendanceSummery.WorkingHourSum += TimeSpan.Zero;
+                }
+            }
+
+            return attendanceSummery;
+        }
         #endregion
     }
 }
