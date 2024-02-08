@@ -1,4 +1,5 @@
-﻿using GlobalSurveysApp.Dtos.PublicListDtos;
+﻿using GlobalSurveysApp.Dtos.AttendanceDtos.AttendanceDto;
+using GlobalSurveysApp.Dtos.PublicListDtos;
 using GlobalSurveysApp.Dtos.UserManagmentDtos.UserDtos;
 using GlobalSurveysApp.Models;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,10 @@ namespace GlobalSurveysApp.Data.Repo
         public Task<List<Role>> GetRole();
         public IQueryable<GetDirectResponsibleResponseDto> GetDirectResponsible();
         public bool SerialNumberIsExits(string serialNumber);
+
+        public Task<List<GetAllWorkingDaysDto>> GetAllWorkingDays();
+        public Task<List<GetAllWorkingHourDto>> GetAllWorkingHour();
+        public Task<List<GetAllLocationsDto>> GetAlllocations();
 
         public bool SaveChanges();
     }
@@ -214,7 +219,7 @@ namespace GlobalSurveysApp.Data.Repo
             return false;
         }
 
-        public void Update(User user , List<int> DayId)
+        public void Update(User user, List<int> DayId)
         {
 
             // Delete the previous working days associated with the user
@@ -242,13 +247,14 @@ namespace GlobalSurveysApp.Data.Repo
             return from r in _context.Roles
                    join u in _context.Users on r.Id equals u.RoleId
                    where r.Title == "Direct responsible"
-                   select new GetDirectResponsibleResponseDto {
+                   select new GetDirectResponsibleResponseDto
+                   {
                        Id = u.Id,
                        Name = u.FirstName + " " + u.LastName
                    };
         }
 
-        
+
         public async Task<User?> GetUserByIdAsync(int id)
         {
             var user = await _context.Users.SingleOrDefaultAsync(x => x.Id == id);
@@ -289,6 +295,43 @@ namespace GlobalSurveysApp.Data.Repo
                        PhoneNumber = u.PrivateMobile,
                        IsActive = u.IsActive,
                    };
+        }
+        public async Task<List<GetAllLocationsDto>> GetAlllocations()
+        {
+            var LocationsDto = await _context.Locations
+                .Select(x => new GetAllLocationsDto
+                {
+                    Id = x.Id,
+                    NameAr = x.NameAr,
+                    NameEn = x.NameEn,
+                }).ToListAsync();
+
+            return LocationsDto;
+        }
+
+        public async Task<List<GetAllWorkingHourDto>> GetAllWorkingHour()
+        {
+            var WorkingHourDto = await _context.WorkingHours
+                .Select(x => new GetAllWorkingHourDto
+                {
+                    Id = x.Id,
+                    Time = x.Start + " " + x.End,
+                }).ToListAsync();
+
+            return WorkingHourDto;
+        }
+
+        public async Task<List<GetAllWorkingDaysDto>> GetAllWorkingDays()
+        {
+            var WorkingDaysDto = await _context.WorkingDays
+                .Select(x => new GetAllWorkingDaysDto
+                {
+                    Id = x.Id,
+                    NameAr = x.NameAr,
+                    NameEn = x.NameEn,
+                }).ToListAsync();
+
+            return WorkingDaysDto;
         }
     }
 

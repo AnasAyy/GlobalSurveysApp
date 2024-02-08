@@ -388,7 +388,6 @@ namespace GlobalSurveysApp.Controllers.UserManagement
         }
 
         [Authorize(Roles = "Admin, Manager"), HttpGet("ViewIdCard")]
-
         public async Task<IActionResult> ViewIdCard(GetUserByIdRequestDto request)
         {
             var user = await _userRepo.GetUserByIdAsync(request.Id);
@@ -431,6 +430,67 @@ namespace GlobalSurveysApp.Controllers.UserManagement
 
             return Ok(type);
         }
+
+
+        [Authorize(Roles = "Admin, Manager"), HttpGet("GetLocations")]
+        public async Task<IActionResult> GetLocations()
+        {
+            var Locations = await _userRepo.GetAlllocations();
+            if (Locations == null)
+            {
+                return Ok(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "لا يوجد بيانات",
+                    MessageEn = "No Data",
+                });
+            }
+
+            
+
+            return Ok(Locations);
+        }
+        
+        [Authorize(Roles = "Admin, Manager"), HttpGet("GetWorkingHour")]
+        public async Task<IActionResult> GetWorkingHour()
+        {
+            var WorkingHour = await _userRepo.GetAllWorkingHour();
+            if (WorkingHour == null)
+            {
+                return Ok(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "لا يوجد بيانات",
+                    MessageEn = "No Data",
+                });
+            }
+
+            
+
+            return Ok(WorkingHour);
+        }
+        
+        [Authorize(Roles = "Admin, Manager"), HttpGet("GetWorkingDay")]
+        public async Task<IActionResult> GetWorkingDay()
+        {
+            var WorkingDays = await _userRepo.GetAllWorkingDays();
+            if (WorkingDays == null)
+            {
+                return Ok(new ErrorDto
+                {
+                    Code = 400,
+                    MessageAr = "لا يوجد بيانات",
+                    MessageEn = "No Data",
+                });
+            }
+
+            
+
+            return Ok(WorkingDays);
+        }
+
+
+
     }
 }
 

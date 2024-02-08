@@ -701,5 +701,8 @@ namespace GlobalSurveysApp.Data.Repo
             return attendanceSummery;
         }
         #endregion
+
+
+
     }
 }
