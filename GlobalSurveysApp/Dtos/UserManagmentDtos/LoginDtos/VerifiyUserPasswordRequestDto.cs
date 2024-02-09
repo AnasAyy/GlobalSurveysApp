@@ -12,6 +12,6 @@ namespace GlobalSurveysApp.Dtos.UserManagmentDtos.LoginManagement
 
         public string ConfirmPassword { get; set; } = null!;
 
-        public string SerialNumber = null!;
+        public string SerialNumber { get; set; } = null!;
     }
 }
